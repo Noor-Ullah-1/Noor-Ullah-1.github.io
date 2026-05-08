@@ -236,7 +236,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 
 <section id="skills" class="sep">
   <div class="wrap">
-    <div class="shead reveal"><div class="slbl">01 — Skills</div><h2 class="stitle">What I Build With</h2></div>
+    <div class="shead reveal"><div class="slbl">01 — Skills</div><h2 class="stitle">ML, Python, Vision & Web Stack</h2></div>
     <div class="sfeat" id="skills-featured"></div>
     <div class="chips-wrap reveal d2">
       <div class="chips-lbl">Full Skill Set</div>
@@ -324,9 +324,9 @@ const ME = {
   /* ── IDENTITY ─────────────────────────────────── */
   firstName:  "Noor",
   lastName:   "Ullah",
-  role:       "ML Engineer  ·  Deep Learning  ·  Computer Vision",
+  role: "Machine Learning Engineer · Computer Vision · Python ",
   location:   "Islamabad, Pakistan",
-  status:     "Available for ML Engineering Roles",
+  status:     "Available for ML / Python / Computer Vision Roles",
 
   /* ── CONTACT ───────────────────────────────────── */
   email:      "noorullahsb@gmail.com",
@@ -337,14 +337,15 @@ const ME = {
   resumeFile: "noor-ullah-resume.pdf",   // filename must match the PDF you upload
 
   /* ── HERO DESCRIPTION ──────────────────────────── */
-  heroDesc: `ML engineer who <strong>builds and ships production-ready deep learning systems</strong>. Expert in computer vision pipelines, model optimisation, and end-to-end deployment using Python-based frameworks. Backed by active international research experience — currently leading a <strong>British Council funded UK–Pakistan collaboration</strong>.`,
-
+  
+  heroDesc: `Machine Learning Engineer focused on <strong>computer vision, deep learning, and AI-powered web applications</strong>. I build end-to-end ML systems — from data preprocessing and model training to evaluation, APIs, deployment, and clean user-facing interfaces. My work combines <strong>Python, deep learning, computer vision, and modern web technologies</strong> to turn research ideas into usable products.`,
+ 
   /* ── HERO STATS ────────────────────────────────── */
   stats: [
-    { value: "2+",    label: "Years ML Dev"    },
-    { value: "9",     label: "Core ML Skills"  },
-    { value: "UK–PK", label: "Int'l Collab"    },
-    { value: "MPhil", label: "Current Degree"  },
+    { value: "Python", label: "Primary Stack" },
+    { value: "CV",     label: "Core Domain" },
+    { value: "Web AI", label: "Product Focus" },
+    { value: "MPhil",  label: "Research Track" },
   ],
 
   /* ── PROFILE BADGES ────────────────────────────── */
@@ -355,38 +356,48 @@ const ME = {
 
   /* ── FEATURED SKILLS (3 cards) ─────────────────── */
   featuredSkills: [
-    {
-      icon:  "🔥",
-      name:  "ML Engineering",
-      desc:  "Building, training, and deploying production-ready deep learning models end-to-end"
-    },
-    {
-      icon:  "👁️",
-      name:  "Computer Vision",
-      desc:  "Object detection, image segmentation, and classification pipelines at scale"
-    },
+  {
+    icon:  "🐍",
+    name:  "ML Engineering",
+    desc:  "Building ML workflows with Python, NumPy, pandas, scikit-learn, PyTorch/TensorFlow, and clean experiment structure."
+  },
+  {
+    icon:  "👁️",
+    name:  "Computer Vision",
+    desc:  "Image classification, object detection, segmentation, transfer learning, preprocessing, augmentation, and model evaluation."
+  },
+  {
+    icon:  "🌐",
+    name:  "AI Web Applications",
+    desc:  "Turning ML models into usable apps with APIs, dashboards, frontend interfaces, and deployment-ready project structure."
+  },
     {
       icon:  "⚗️",
       name:  "Applied Research",
       desc:  "Experiment design, model evaluation, ablation studies, and academic benchmarking"
     },
-  ],
+],
 
   /* ── SKILLS CHIPS ──────────────────────────────── */
   skills: [
-    { icon: "🐍", name: "Python"                 },
-    { icon: "🔥", name: "PyTorch / TensorFlow"   },
-    { icon: "🔗", name: "Deep Learning"          },
-    { icon: "👁️", name: "Computer Vision"        },
-    { icon: "🎯", name: "Object Detection"       },
-    { icon: "✂️", name: "Image Segmentation"     },
-    { icon: "🏷️", name: "Image Classification"  },
-    { icon: "🔄", name: "Transfer Learning"      },
-    { icon: "📊", name: "Supervised Learning"    },
-    { icon: "📈", name: "Model Evaluation"       },
-    { icon: "🎨", name: "Data Augmentation"      },
-    { icon: "📦", name: "Model Deployment"       },
-  ],
+  { icon: "🐍", name: "Python" },
+  { icon: "📊", name: "NumPy / pandas" },
+  { icon: "🤖", name: "scikit-learn" },
+  { icon: "🔥", name: "PyTorch" },
+  { icon: "🧠", name: "TensorFlow / Keras" },
+  { icon: "👁️", name: "OpenCV" },
+  { icon: "🎯", name: "Object Detection" },
+  { icon: "✂️", name: "Image Segmentation" },
+  { icon: "🏷️", name: "Image Classification" },
+  { icon: "🔄", name: "Transfer Learning" },
+  { icon: "📈", name: "Model Evaluation" },
+  { icon: "🧪", name: "Experiment Design" },
+  { icon: "🚀", name: "FastAPI / Flask" },
+  { icon: "🌐", name: "HTML / CSS / JavaScript" },
+  { icon: "⚛️", name: "React Basics" },
+  { icon: "📦", name: "Model Deployment" },
+  { icon: "🗃️", name: "Git / GitHub" },
+],
 
   /* ── PROJECTS ──────────────────────────────────── */
   projects: [
@@ -465,15 +476,15 @@ const ME = {
 
   /* ── RESUME HIGHLIGHTS ─────────────────────────── */
   resumeHighlights: [
-    "End-to-end ML engineering — training to deployment",
-    "Deep learning and applied computer vision systems",
-    "Model optimisation, evaluation, and benchmarking",
-    "International research collaboration experience",
-  ],
-
+  "Python-based machine learning and deep learning development",
+  "Computer vision workflows: classification, detection, and segmentation",
+  "Model evaluation using metrics, benchmarks, and experiment tracking",
+  "AI web app development with frontend interfaces and Python backend APIs",
+  "International applied ML research collaboration experience",
+],
   /* ── CONTACT SECTION ───────────────────────────── */
-  contactHeading: `Let's build<br/><span>something great</span><br/>together.`,
-  contactDesc:    "Open to ML engineering roles, applied research collaborations, and interesting computer vision projects. Always happy to connect.",
+  contactHeading: `Let's build<br/><span>ML-powered web products</span><br/>that actually work.`,
+contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applications, Computer Vision Projects and Applied Research Collaborations.",
   languages:      "English · Urdu",
 
 };
