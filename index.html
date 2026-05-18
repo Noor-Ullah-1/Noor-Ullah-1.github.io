@@ -27,7 +27,8 @@ a{color:inherit;text-decoration:none}
 .grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)}
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
 .scanline{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(to bottom,transparent 50%,rgba(99,102,241,.012) 50%);background-size:100% 4px}
-#cv{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.16}
+#sbg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.13}
 .wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem;position:relative;z-index:2}
 nav{position:fixed;top:0;width:100%;z-index:500;padding:1.2rem 0;transition:background .45s ease,box-shadow .45s ease}
 nav.scrolled{background:rgba(7,9,15,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
@@ -94,7 +95,7 @@ section{padding:7rem 0;position:relative;z-index:2}
 .slbl::after{content:'';flex:1;max-width:36px;height:1px;background:var(--indigo);opacity:.5}
 .stitle{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.032em;line-height:1.05}
 .shead{margin-bottom:4rem}
-.sfeat{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2.5rem}
+.sfeat{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2.5rem}
 .skcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;overflow:hidden;transition:border-color .32s,background .32s,transform .4s var(--ease),box-shadow .4s}
 .skcard::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 65% 15%,rgba(99,102,241,.08),transparent 55%);opacity:0;transition:opacity .38s}
 .skcard:hover{border-color:rgba(99,102,241,.42);background:rgba(255,255,255,.055);transform:translateY(-7px);box-shadow:0 18px 52px rgba(0,0,0,.28),0 0 0 1px rgba(99,102,241,.13)}
@@ -187,6 +188,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 <div class="cring" id="cring"></div>
 <div id="progress"></div>
 <div class="mesh"></div><div class="grid"></div><div class="grain"></div><div class="scanline"></div>
+<canvas id="sbg"></canvas>
 <canvas id="cv"></canvas>
 
 <nav id="nav">
@@ -331,22 +333,21 @@ const ME = {
   /* ── CONTACT ───────────────────────────────────── */
   email:      "noorullahsb@gmail.com",
   linkedin:   "https://linkedin.com/in/noor-ullah007/",
-  github:     "https://github.com/Noor-Ullah-1", 
-  
+  github:     "https://github.com/Noor-Ullah-1",
+
   /* ── RESUME ────────────────────────────────────── */
-  resumeFile: "noor-ullah-resume.pdf",   // filename must match the PDF you upload
+  resumeFile: "noor-ullah-resume.pdf",
 
   /* ── HERO DESCRIPTION ──────────────────────────── */
-  
-  heroDesc: `I’m a Machine Learning Engineer working with computer vision, deep learning, and Python-based web applications. I enjoy building practical ML systems from start to finish, including data preparation, model training, evaluation, backend APIs, deployment, and simple interfaces people can actually use. My focus is on turning research ideas into working tools, especially in applied machine learning and computer vision.`,
- 
+  heroDesc: `I'm a Machine Learning Engineer working with computer vision, deep learning, and Python-based web applications. I enjoy building practical ML systems from start to finish, including data preparation, model training, evaluation, backend APIs, deployment, and simple interfaces people can actually use. My focus is on turning research ideas into working tools, especially in applied machine learning and computer vision.`,
+
   /* ── HERO STATS ────────────────────────────────── */
   stats: [
-  { value: "2+",    label: "Years Experience" },
-  { value: "ML",     label: "Core Focus" },
-  { value: "UK–PK", label: "Int'l Collaboration" },
-  { value: "MPhil", label: "Current Degree"  },
-],
+    { value: "2+",    label: "Years Experience"      },
+    { value: "ML",    label: "Core Focus"            },
+    { value: "UK–PK", label: "Int'l Collaboration"   },
+    { value: "MPhil", label: "Current Degree"        },
+  ],
 
   /* ── PROFILE BADGES ────────────────────────────── */
   badges: [
@@ -354,43 +355,43 @@ const ME = {
     { text: "Researcher",  style: "bc" },
   ],
 
-  /* ── FEATURED SKILLS (3 cards) ─────────────────── */
+  /* ── FEATURED SKILLS (4 cards) ─────────────────── */
   featuredSkills: [
-  {
-    icon:  "🐍",
-    name:  "ML Engineering",
-    desc:  "Building ML workflows with Python, NumPy, pandas, scikit-learn, PyTorch/TensorFlow, and clean experiment structure."
-  },
-  {
-    icon:  "👁️",
-    name:  "Computer Vision",
-    desc:  "Image classification, object detection, segmentation, transfer learning, preprocessing, augmentation, and model evaluation."
-  },
-  {
-    icon:  "🌐",
-    name:  "AI Web Applications",
-    desc:  "Turning ML models into usable apps with APIs, dashboards, frontend interfaces, and deployment-ready project structure."
-  },
     {
-      icon:  "⚗️",
-      name:  "Applied Research",
-      desc:  "Experiment design, model evaluation, ablation studies, and academic benchmarking"
+      icon: "🐍",
+      name: "ML Engineering",
+      desc: "Building ML workflows with Python, NumPy, pandas, scikit-learn, PyTorch/TensorFlow, and clean experiment structure."
     },
-],
+    {
+      icon: "👁️",
+      name: "Computer Vision",
+      desc: "Image classification, object detection, segmentation, transfer learning, preprocessing, augmentation, and model evaluation."
+    },
+    {
+      icon: "🌐",
+      name: "AI Web Applications",
+      desc: "Turning ML models into usable apps with APIs, dashboards, frontend interfaces, and deployment-ready project structure."
+    },
+    {
+      icon: "⚗️",
+      name: "Applied Research",
+      desc: "Experiment design, model evaluation, ablation studies, and academic benchmarking."
+    },
+  ],
 
   /* ── SKILLS CHIPS ──────────────────────────────── */
   skills: [
-  { icon: "🐍", name: "Python" },
-  { icon: "🔥", name: "PyTorch / TensorFlow" },
-  { icon: "🤖", name: "scikit-learn" },
-  { icon: "👁️", name: "OpenCV" },
-  { icon: "🎯", name: "Object Detection" },
-  { icon: "✂️", name: "Image Segmentation" },
-  { icon: "🔄", name: "Transfer Learning" },
-  { icon: "📈", name: "Model Evaluation" },
-  { icon: "🚀", name: "FastAPI / Flask" },
-  { icon: "🌐", name: "HTML / CSS / JavaScript" },
-],
+    { icon: "🐍", name: "Python"               },
+    { icon: "🔥", name: "PyTorch / TensorFlow" },
+    { icon: "🤖", name: "scikit-learn"         },
+    { icon: "👁️", name: "OpenCV"               },
+    { icon: "🎯", name: "Object Detection"     },
+    { icon: "✂️", name: "Image Segmentation"   },
+    { icon: "🔄", name: "Transfer Learning"    },
+    { icon: "📈", name: "Model Evaluation"     },
+    { icon: "🚀", name: "FastAPI / Flask"      },
+    { icon: "🌐", name: "HTML / CSS / JS"      },
+  ],
 
   /* ── PROJECTS ──────────────────────────────────── */
   projects: [
@@ -461,23 +462,24 @@ const ME = {
 
   /* ── CERTIFICATIONS ────────────────────────────── */
   certifications: [
-    { name: "AI For Everyone",                  issuer: "DeepLearning.AI",                  year: "2025" },
-    { name: "Digital Information Literacy",     issuer: "The State University of New York",  year: "2025" },
-    { name: "Introduction to Mobile Development", issuer: "Meta",                            year: "2023" },
-    { name: "Technical Support Fundamentals",   issuer: "Google",                            year: "2022" },
+    { name: "AI For Everyone",                    issuer: "DeepLearning.AI",                 year: "2025" },
+    { name: "Digital Information Literacy",       issuer: "The State University of New York", year: "2025" },
+    { name: "Introduction to Mobile Development", issuer: "Meta",                             year: "2023" },
+    { name: "Technical Support Fundamentals",     issuer: "Google",                           year: "2022" },
   ],
 
   /* ── RESUME HIGHLIGHTS ─────────────────────────── */
   resumeHighlights: [
-  "Python-based machine learning and deep learning development",
-  "Computer vision workflows: classification, detection, and segmentation",
-  "Model evaluation using metrics, benchmarks, and experiment tracking",
-  "AI web app development with frontend interfaces and Python backend APIs",
-  "International applied ML research collaboration experience",
-],
+    "Python-based machine learning and deep learning development",
+    "Computer vision workflows: classification, detection, and segmentation",
+    "Model evaluation using metrics, benchmarks, and experiment tracking",
+    "AI web app development with frontend interfaces and Python backend APIs",
+    "International applied ML research collaboration experience",
+  ],
+
   /* ── CONTACT SECTION ───────────────────────────── */
   contactHeading: `Let's build<br/><span>ML-powered web products</span><br/>that actually work.`,
-contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applications, Computer Vision Projects and Applied Research Collaborations.",
+  contactDesc:    "Open to ML Engineering Roles, Python Development, AI Web Applications, Computer Vision Projects and Applied Research Collaborations.",
   languages:      "English · Urdu",
 
 };
@@ -491,11 +493,9 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
   const set = (id, html) => { const el = $(id); if(el) el.innerHTML = html; };
   const href = (id, url) => { const el = $(id); if(el) el.href = url; };
 
-  // nav / title
   document.title = `${ME.firstName} ${ME.lastName} — ML Engineer`;
   set('nav-name', `${ME.firstName.toLowerCase()}.${ME.lastName.toLowerCase()}`);
 
-  // hero
   set('hero-status',    ME.status);
   set('hero-firstname', ME.firstName);
   set('hero-lastname',  ME.lastName);
@@ -503,25 +503,20 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
   set('hero-desc',      ME.heroDesc);
   set('hero-location',  ME.location);
 
-  // hero stats
   set('hero-stats', ME.stats.map(s =>
     `<div><span class="sv"${s.value.match(/^\d/) ? ` data-count="${parseInt(s.value)}"` : ''}>${s.value}</span><span class="sl">${s.label}</span></div>`
   ).join(''));
 
-  // badges
   set('hero-badges', ME.badges.map(b =>
     `<div class="badge ${b.style}">${b.text}</div>`
   ).join(''));
 
-  // resume links
   ['resume-dl','resume-dl2'].forEach(id => {
     const el = $(id);
     if(el){ el.href = ME.resumeFile; el.setAttribute('download',''); }
   });
   href('resume-open', ME.resumeFile);
-  set('resume-filename-hint', ME.resumeFile);
 
-  // featured skills
   set('skills-featured', ME.featuredSkills.map((s, i) =>
     `<div class="skcard reveal d${i+1}">
       <span class="ski">${s.icon}</span>
@@ -530,12 +525,10 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     </div>`
   ).join(''));
 
-  // chips
   set('skills-chips', ME.skills.map(s =>
     `<div class="chip"><span class="ci">${s.icon}</span>${s.name}</div>`
   ).join(''));
 
-  // projects
   set('projects-grid', ME.projects.map((p, i) =>
     `<div class="pcard reveal d${i+1}">
       <div class="pcard-top"><span class="pcat">${p.category}</span><span class="pmet">${p.metric}</span></div>
@@ -545,7 +538,6 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     </div>`
   ).join(''));
 
-  // experience
   set('experience-list', ME.experience.map(e =>
     `<div class="eitem">
       <div class="edot"></div>
@@ -562,7 +554,6 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     </div>`
   ).join(''));
 
-  // education
   set('education-grid', ME.education.map((e, i) =>
     `<div class="educard reveal d${i+1}">
       <div class="edu-ico">${e.icon}</div>
@@ -572,7 +563,6 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     </div>`
   ).join(''));
 
-  // certs
   set('certs-grid', ME.certifications.map(c =>
     `<div class="certitem">
       <div class="certln"></div>
@@ -580,10 +570,8 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     </div>`
   ).join(''));
 
-  // resume highlights
   set('resume-highlights', ME.resumeHighlights.map(h => `<li>${h}</li>`).join(''));
 
-  // contact
   set('contact-heading', ME.contactHeading);
   set('contact-desc', ME.contactDesc);
   const el = $('contact-email-link');
@@ -596,19 +584,15 @@ contactDesc: "Open to ML Engineering Roles, Python Development, AI Web Applicati
     <div class="ctlink" style="cursor:default"><div class="ctll"><span>🌐</span>${ME.languages}</div><span class="ctarr" style="font-size:.66rem">Languages</span></div>
   `);
 
-  // footer
   set('footer-brand', `${ME.firstName} ${ME.lastName} <span>·</span> ML Engineer <span>·</span> 2026`);
   set('footer-note',  `${ME.location} · ${ME.email}`);
 
-  // re-bind cursor hover after render
   setTimeout(() => {
     document.querySelectorAll('a,button,.chip,.skcard,.pcard,.educard,.ctlink,.pbox,.etag').forEach(el => {
       el.addEventListener('mouseenter', () => { dot.classList.add('h'); ring.classList.add('h'); });
       el.addEventListener('mouseleave', () => { dot.classList.remove('h'); ring.classList.remove('h'); });
     });
-    // re-observe newly rendered reveal elements
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-    // re-observe count-up
     document.querySelectorAll('[data-count]').forEach(c => cobs.observe(c));
   }, 50);
 })();
@@ -648,6 +632,130 @@ const cobs = new IntersectionObserver(entries=>{
 
 /* ── RESUME IFRAME ── */
 fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById('rprev').innerHTML=`<iframe src="${ME.resumeFile}#view=FitH" title="Resume preview"></iframe>`; }).catch(()=>{});
+
+/* ── GALAXY SHADER ── */
+(function initShader() {
+  const canvas = document.getElementById('sbg');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+
+  const VERT = `attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0.,1.); }`;
+
+  const FRAG = `
+    precision mediump float;
+    uniform vec2  u_res;
+    uniform float u_time;
+    uniform vec2  u_mouse;
+
+    float h21(vec2 p){
+      p=fract(p*vec2(234.34,435.345));
+      p+=dot(p,p+34.23);
+      return fract(p.x*p.y);
+    }
+    float noise(vec2 p){
+      vec2 i=floor(p),f=fract(p);
+      f=f*f*(3.-2.*f);
+      return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),
+                 mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);
+    }
+    float fbm(vec2 p){
+      float v=0.,a=.5;
+      for(int i=0;i<6;i++){v+=a*noise(p);p=p*2.1+vec2(13.47,7.31);a*=.5;}
+      return v;
+    }
+    float stars(vec2 uv,float density,float sz){
+      vec2 g=floor(uv*density),f=fract(uv*density)-.5;
+      float rnd=h21(g);
+      if(rnd<.82)return 0.;
+      float sz2=sz*(.3+.7*h21(g+17.3));
+      float twink=.75+.25*sin(u_time*(1.+rnd*4.)+rnd*6.28318);
+      vec2 off=vec2(h21(g+1.1)-.5,h21(g+2.2)-.5)*.7;
+      float d=length(f-off);
+      return smoothstep(sz2,0.,d)*twink;
+    }
+    void main(){
+      vec2 uv=gl_FragCoord.xy/u_res;
+      vec2 mouse=u_mouse/u_res;
+      float t=u_time*.07;
+      vec2 mOff=(uv-mouse)*.06;
+      vec2 p=uv*2.2+vec2(t*.25,0.);
+      vec2 q=vec2(fbm(p+mOff),fbm(p+vec2(5.2,1.3)+mOff));
+      vec2 r=vec2(fbm(p+2.*q+vec2(1.7,9.2)+.11*t),
+                  fbm(p+2.*q+vec2(8.3,2.8)+.09*t));
+      float f=fbm(p+2.4*r);
+      vec3 space  =vec3(.006,.008,.022);
+      vec3 nBlue  =vec3(.04,.09,.42);
+      vec3 nPurple=vec3(.28,.04,.48);
+      vec3 nCyan  =vec3(.02,.22,.52);
+      vec3 nViolet=vec3(.42,.10,.72);
+      vec3 nPink  =vec3(.55,.08,.45);
+      vec3 nCore  =vec3(.60,.55,.95);
+      vec3 neb=space;
+      neb=mix(neb,nBlue,  smoothstep(.18,.75,f)      *.90);
+      neb=mix(neb,nPurple,smoothstep(.38,.88,f*q.x)  *.75);
+      neb=mix(neb,nCyan,  smoothstep(.48,.82,r.x)    *.50);
+      neb=mix(neb,nViolet,smoothstep(.55,.90,q.y*f)  *.55);
+      neb=mix(neb,nPink,  smoothstep(.62,.95,r.y*f)  *.38);
+      neb=mix(neb,nCore,  smoothstep(.78,1.00,f*f)   *.28);
+      float band=exp(-pow((uv.x-uv.y*.55-.08)*2.8,2.));
+      neb+=vec3(.08,.06,.22)*band*.35;
+      vec3 col=neb;
+      col+=stars(uv,130.,.003)*vec3(.65,.75,1.);
+      col+=stars(uv, 80.,.005)*vec3(.78,.85,1.);
+      col+=stars(uv, 38.,.009)*vec3(.90,.92,1.);
+      float br=stars(uv,16.,.018);
+      col+=br*vec3(1.,.97,.93);
+      col+=br*vec3(.28,.18,.55)*4.;
+      float md=length(uv-mouse);
+      col+=nCore*exp(-md*7.)*.14;
+      col+=nCyan*exp(-md*11.)*.09;
+      vec2 vig=uv-.5;
+      col*=1.-dot(vig,vig)*1.35;
+      col=clamp(col,0.,.72);
+      gl_FragColor=vec4(col,1.);
+    }
+  `;
+
+  function compile(type, src){
+    const s=gl.createShader(type);
+    gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(s));return null;}
+    return s;
+  }
+  const prog2=gl.createProgram();
+  gl.attachShader(prog2,compile(gl.VERTEX_SHADER,VERT));
+  gl.attachShader(prog2,compile(gl.FRAGMENT_SHADER,FRAG));
+  gl.linkProgram(prog2);
+  if(!gl.getProgramParameter(prog2,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(prog2));return;}
+  gl.useProgram(prog2);
+
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog2,'a_pos');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+
+  const uRes  =gl.getUniformLocation(prog2,'u_res');
+  const uTime =gl.getUniformLocation(prog2,'u_time');
+  const uMouse=gl.getUniformLocation(prog2,'u_mouse');
+
+  let smx=innerWidth*.5, smy=innerHeight*.5, tmx=smx, tmy=smy;
+  document.addEventListener('mousemove',e=>{tmx=e.clientX;tmy=e.clientY;});
+
+  function rsz(){ canvas.width=innerWidth; canvas.height=innerHeight; gl.viewport(0,0,innerWidth,innerHeight); }
+  rsz(); window.addEventListener('resize',rsz);
+
+  const t0=performance.now();
+  (function loop(){
+    smx+=(tmx-smx)*.055; smy+=(tmy-smy)*.055;
+    gl.uniform2f(uRes,canvas.width,canvas.height);
+    gl.uniform1f(uTime,(performance.now()-t0)*.001);
+    gl.uniform2f(uMouse,smx,canvas.height-smy);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(loop);
+  })();
+})();
 
 /* ── PARTICLE CANVAS ── */
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'); let W,H,pts=[];
