@@ -633,8 +633,13 @@ const cobs = new IntersectionObserver(entries=>{
 /* ── RESUME IFRAME ── */
 fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById('rprev').innerHTML=`<iframe src="${ME.resumeFile}#view=FitH" title="Resume preview"></iframe>`; }).catch(()=>{});
 
-/* ── GALAXY SHADER ── */
+/* ── NEURAL FIRING SHADER ── */
 (function initShader() {
+  /* skip on mobile — CSS mesh + particles look great there */
+  const isMobile = window.innerWidth < 768 ||
+    /Android|iPhone|iPad|iPod|webOS|BlackBerry/i.test(navigator.userAgent);
+  if (isMobile) { document.getElementById('sbg').style.display='none'; return; }
+
   const canvas = document.getElementById('sbg');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
   if (!gl) return;
@@ -647,71 +652,96 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
     uniform float u_time;
     uniform vec2  u_mouse;
 
+    #define NL 6
+    #define NN 4
+
     float h21(vec2 p){
-      p=fract(p*vec2(234.34,435.345));
-      p+=dot(p,p+34.23);
+      p=fract(p*vec2(127.1,311.7));
+      p+=dot(p,p+74.74);
       return fract(p.x*p.y);
     }
-    float noise(vec2 p){
-      vec2 i=floor(p),f=fract(p);
-      f=f*f*(3.-2.*f);
-      return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),
-                 mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);
+    float sdSeg(vec2 p,vec2 a,vec2 b){
+      vec2 pa=p-a,ba=b-a;
+      return length(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.));
     }
-    float fbm(vec2 p){
-      float v=0.,a=.5;
-      for(int i=0;i<6;i++){v+=a*noise(p);p=p*2.1+vec2(13.47,7.31);a*=.5;}
-      return v;
+
+    vec2 npos(float l,float n){
+      float x=mix(.08,.92,l/float(NL-1));
+      float y=mix(.12,.88,n/float(NN-1))+(h21(vec2(l*3.1+1.,n*7.3+2.))-.5)*.06;
+      return vec2(x,y);
     }
-    float stars(vec2 uv,float density,float sz){
-      vec2 g=floor(uv*density),f=fract(uv*density)-.5;
-      float rnd=h21(g);
-      if(rnd<.82)return 0.;
-      float sz2=sz*(.3+.7*h21(g+17.3));
-      float twink=.75+.25*sin(u_time*(1.+rnd*4.)+rnd*6.28318);
-      vec2 off=vec2(h21(g+1.1)-.5,h21(g+2.2)-.5)*.7;
-      float d=length(f-off);
-      return smoothstep(sz2,0.,d)*twink;
+
+    float fireFn(float l,float n){
+      float s=h21(vec2(l*7.3+1.,n*5.1+2.));
+      return smoothstep(.60,1.,sin(u_time*(.65+s*1.4)+s*6.2832)*.5+.5);
     }
+
     void main(){
-      vec2 uv=gl_FragCoord.xy/u_res;
+      vec2 uv   =gl_FragCoord.xy/u_res;
+      float asp =u_res.x/u_res.y;
       vec2 mouse=u_mouse/u_res;
-      float t=u_time*.07;
-      vec2 mOff=(uv-mouse)*.06;
-      vec2 p=uv*2.2+vec2(t*.25,0.);
-      vec2 q=vec2(fbm(p+mOff),fbm(p+vec2(5.2,1.3)+mOff));
-      vec2 r=vec2(fbm(p+2.*q+vec2(1.7,9.2)+.11*t),
-                  fbm(p+2.*q+vec2(8.3,2.8)+.09*t));
-      float f=fbm(p+2.4*r);
-      vec3 space  =vec3(.006,.008,.022);
-      vec3 nBlue  =vec3(.04,.09,.42);
-      vec3 nPurple=vec3(.28,.04,.48);
-      vec3 nCyan  =vec3(.02,.22,.52);
-      vec3 nViolet=vec3(.42,.10,.72);
-      vec3 nPink  =vec3(.55,.08,.45);
-      vec3 nCore  =vec3(.60,.55,.95);
-      vec3 neb=space;
-      neb=mix(neb,nBlue,  smoothstep(.18,.75,f)      *.90);
-      neb=mix(neb,nPurple,smoothstep(.38,.88,f*q.x)  *.75);
-      neb=mix(neb,nCyan,  smoothstep(.48,.82,r.x)    *.50);
-      neb=mix(neb,nViolet,smoothstep(.55,.90,q.y*f)  *.55);
-      neb=mix(neb,nPink,  smoothstep(.62,.95,r.y*f)  *.38);
-      neb=mix(neb,nCore,  smoothstep(.78,1.00,f*f)   *.28);
-      float band=exp(-pow((uv.x-uv.y*.55-.08)*2.8,2.));
-      neb+=vec3(.08,.06,.22)*band*.35;
-      vec3 col=neb;
-      col+=stars(uv,130.,.003)*vec3(.65,.75,1.);
-      col+=stars(uv, 80.,.005)*vec3(.78,.85,1.);
-      col+=stars(uv, 38.,.009)*vec3(.90,.92,1.);
-      float br=stars(uv,16.,.018);
-      col+=br*vec3(1.,.97,.93);
-      col+=br*vec3(.28,.18,.55)*4.;
-      float md=length(uv-mouse);
-      col+=nCore*exp(-md*7.)*.14;
-      col+=nCyan*exp(-md*11.)*.09;
+      vec2 uvA  =vec2(uv.x*asp,uv.y);
+
+      vec3 col=vec3(.004,.005,.018);
+
+      /* ── CONNECTIONS ── */
+      for(int la=0;la<NL-1;la++){
+        float laf=float(la);
+        for(int na=0;na<NN;na++){
+          float naf=float(na);
+          vec2 A =npos(laf,naf);
+          float fA=fireFn(laf,naf);
+          vec2 AC=vec2(A.x*asp,A.y);
+          for(int nb=0;nb<NN;nb++){
+            float nbf=float(nb);
+            float conn=step(.35,h21(vec2(laf*float(NN)+naf,nbf+17.3)));
+            vec2 B =npos(laf+1.,nbf);
+            vec2 BC=vec2(B.x*asp,B.y);
+            float d=sdSeg(uvA,AC,BC);
+            float lineGlow=exp(-d*380.)*(.08+.22*fA)*conn;
+            float pSeed=h21(vec2(laf*float(NN*NN)+naf*float(NN)+nbf,53.7));
+            float pT=fract(u_time*(.35+pSeed*.45)+pSeed*6.2832);
+            vec2  pPos=mix(AC,BC,pT);
+            float pd=length(uvA-pPos);
+            float pulseGlow=exp(-pd*260.)*fA*2.2*conn;
+            col+=(vec3(.18,.20,.72)*lineGlow)+(mix(vec3(.08,.88,.96),vec3(.72,.28,1.),pSeed)*pulseGlow);
+          }
+        }
+      }
+
+      /* ── NODES ── */
+      for(int l=0;l<NL;l++){
+        float lf=float(l);
+        for(int n=0;n<NN;n++){
+          float nf=float(n);
+          vec2 P =npos(lf,nf);
+          vec2 PC=vec2(P.x*asp,P.y);
+          float d=length(uvA-PC);
+          float fire=fireFn(lf,nf);
+          float mBoost=exp(-dot(P-mouse,P-mouse)*28.)*.75;
+          fire=clamp(fire+mBoost,0.,1.);
+          float glow=exp(-d*90.)*(.35+.65*fire);
+          float core=smoothstep(.012,.003,d)*(1.+fire*.8);
+          vec3 nodeCol=mix(vec3(.28,.30,.88),
+            mix(vec3(.05,.90,.96),vec3(.68,.28,1.0),nf/float(NN-1)),fire);
+          col+=nodeCol*(glow+core);
+          col+=vec3(.85,.92,1.)*smoothstep(.005,.0,d)*fire*2.5;
+        }
+      }
+
+      /* ── LAYER AXIS LINES ── */
+      for(int l=0;l<NL;l++){
+        float lx=mix(.08,.92,float(l)/float(NL-1));
+        col+=vec3(.10,.10,.38)*exp(-abs(uv.x-lx)*asp*600.)*.07;
+      }
+
+      /* ── SCANLINE DATA FEEL ── */
+      col+=vec3(.02,.02,.06)*(sin(uv.y*u_res.y*.5+u_time*1.5)*.5+.5)*.4;
+
+      /* ── VIGNETTE ── */
       vec2 vig=uv-.5;
-      col*=1.-dot(vig,vig)*1.35;
-      col=clamp(col,0.,.72);
+      col*=1.-dot(vig,vig)*1.25;
+      col=clamp(col,0.,1.);
       gl_FragColor=vec4(col,1.);
     }
   `;
