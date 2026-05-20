@@ -633,9 +633,8 @@ const cobs = new IntersectionObserver(entries=>{
 /* ── RESUME IFRAME ── */
 fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById('rprev').innerHTML=`<iframe src="${ME.resumeFile}#view=FitH" title="Resume preview"></iframe>`; }).catch(()=>{});
 
-/* ── NEURAL FIRING SHADER ── */
+/* ── MINIMAL AMBIENT SHADER ── */
 (function initShader() {
-  /* skip on mobile — CSS mesh + particles look great there */
   const isMobile = window.innerWidth < 768 ||
     /Android|iPhone|iPad|iPod|webOS|BlackBerry/i.test(navigator.userAgent);
   if (isMobile) { document.getElementById('sbg').style.display='none'; return; }
@@ -652,97 +651,69 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
     uniform float u_time;
     uniform vec2  u_mouse;
 
-    #define NL 6
-    #define NN 4
-
-    float h21(vec2 p){
-      p=fract(p*vec2(127.1,311.7));
-      p+=dot(p,p+74.74);
-      return fract(p.x*p.y);
-    }
-    float sdSeg(vec2 p,vec2 a,vec2 b){
-      vec2 pa=p-a,ba=b-a;
-      return length(pa-ba*clamp(dot(pa,ba)/dot(ba,ba),0.,1.));
-    }
-
-    vec2 npos(float l,float n){
-      float x=mix(.08,.92,l/float(NL-1));
-      float y=mix(.12,.88,n/float(NN-1))+(h21(vec2(l*3.1+1.,n*7.3+2.))-.5)*.06;
-      return vec2(x,y);
+    float noise(vec2 p){
+      vec2 i=floor(p), f=fract(p);
+      f=f*f*(3.-2.*f);
+      vec2 u=vec2(
+        fract(sin(dot(i,           vec2(127.1,311.7)))*43758.5),
+        fract(sin(dot(i+vec2(1,0), vec2(127.1,311.7)))*43758.5)
+      );
+      float a=fract(sin(dot(i,           vec2(127.1,311.7)))*43758.5);
+      float b=fract(sin(dot(i+vec2(1,0), vec2(127.1,311.7)))*43758.5);
+      float c=fract(sin(dot(i+vec2(0,1), vec2(127.1,311.7)))*43758.5);
+      float d=fract(sin(dot(i+vec2(1,1), vec2(127.1,311.7)))*43758.5);
+      return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
     }
 
-    float fireFn(float l,float n){
-      float s=h21(vec2(l*7.3+1.,n*5.1+2.));
-      return smoothstep(.60,1.,sin(u_time*(.65+s*1.4)+s*6.2832)*.5+.5);
+    float fbm(vec2 p){
+      float v=0., a=.5;
+      for(int i=0;i<3;i++){ v+=a*noise(p); p=p*2.1+vec2(5.2,1.3); a*=.45; }
+      return v;
     }
 
     void main(){
-      vec2 uv   =gl_FragCoord.xy/u_res;
-      float asp =u_res.x/u_res.y;
-      vec2 mouse=u_mouse/u_res;
-      vec2 uvA  =vec2(uv.x*asp,uv.y);
+      vec2 uv    = gl_FragCoord.xy / u_res;
+      vec2 mouse = u_mouse / u_res;
+      float t    = u_time * 0.09;
 
-      vec3 col=vec3(.004,.005,.018);
+      /* two slow organic blobs drifting — very calm */
+      vec2 p1 = uv * 1.8 + vec2(t * 0.22, t * 0.13);
+      vec2 p2 = uv * 2.2 + vec2(-t * 0.15, t * 0.19);
+      float f1 = fbm(p1);
+      float f2 = fbm(p2 + f1 * 0.4);
+      float f  = fbm(p2 + f2 * 0.5);
 
-      /* ── CONNECTIONS ── */
-      for(int la=0;la<NL-1;la++){
-        float laf=float(la);
-        for(int na=0;na<NN;na++){
-          float naf=float(na);
-          vec2 A =npos(laf,naf);
-          float fA=fireFn(laf,naf);
-          vec2 AC=vec2(A.x*asp,A.y);
-          for(int nb=0;nb<NN;nb++){
-            float nbf=float(nb);
-            float conn=step(.35,h21(vec2(laf*float(NN)+naf,nbf+17.3)));
-            vec2 B =npos(laf+1.,nbf);
-            vec2 BC=vec2(B.x*asp,B.y);
-            float d=sdSeg(uvA,AC,BC);
-            float lineGlow=exp(-d*380.)*(.08+.22*fA)*conn;
-            float pSeed=h21(vec2(laf*float(NN*NN)+naf*float(NN)+nbf,53.7));
-            float pT=fract(u_time*(.35+pSeed*.45)+pSeed*6.2832);
-            vec2  pPos=mix(AC,BC,pT);
-            float pd=length(uvA-pPos);
-            float pulseGlow=exp(-pd*260.)*fA*2.2*conn;
-            col+=(vec3(.18,.20,.72)*lineGlow)+(mix(vec3(.08,.88,.96),vec3(.72,.28,1.),pSeed)*pulseGlow);
-          }
-        }
-      }
+      /* mouse warmth — subtle bright patch follows cursor */
+      float md = length(uv - mouse);
+      float mw = exp(-md * md * 5.5) * 0.08;
 
-      /* ── NODES ── */
-      for(int l=0;l<NL;l++){
-        float lf=float(l);
-        for(int n=0;n<NN;n++){
-          float nf=float(n);
-          vec2 P =npos(lf,nf);
-          vec2 PC=vec2(P.x*asp,P.y);
-          float d=length(uvA-PC);
-          float fire=fireFn(lf,nf);
-          float mBoost=exp(-dot(P-mouse,P-mouse)*28.)*.75;
-          fire=clamp(fire+mBoost,0.,1.);
-          float glow=exp(-d*90.)*(.35+.65*fire);
-          float core=smoothstep(.012,.003,d)*(1.+fire*.8);
-          vec3 nodeCol=mix(vec3(.28,.30,.88),
-            mix(vec3(.05,.90,.96),vec3(.68,.28,1.0),nf/float(NN-1)),fire);
-          col+=nodeCol*(glow+core);
-          col+=vec3(.85,.92,1.)*smoothstep(.005,.0,d)*fire*2.5;
-        }
-      }
+      /* pure near-black base */
+      vec3 bg = vec3(0.027, 0.035, 0.059);
 
-      /* ── LAYER AXIS LINES ── */
-      for(int l=0;l<NL;l++){
-        float lx=mix(.08,.92,float(l)/float(NL-1));
-        col+=vec3(.10,.10,.38)*exp(-abs(uv.x-lx)*asp*600.)*.07;
-      }
+      /* indigo cloud — barely there */
+      vec3 indigo = vec3(0.22, 0.24, 0.72);
+      float iMask = smoothstep(0.38, 0.72, f) * 0.13;
 
-      /* ── SCANLINE DATA FEEL ── */
-      col+=vec3(.02,.02,.06)*(sin(uv.y*u_res.y*.5+u_time*1.5)*.5+.5)*.4;
+      /* cyan accent — even more subtle, only at peaks */
+      vec3 cyan = vec3(0.04, 0.55, 0.72);
+      float cMask = smoothstep(0.58, 0.82, f2) * 0.07;
 
-      /* ── VIGNETTE ── */
-      vec2 vig=uv-.5;
-      col*=1.-dot(vig,vig)*1.25;
-      col=clamp(col,0.,1.);
-      gl_FragColor=vec4(col,1.);
+      /* violet hint */
+      vec3 violet = vec3(0.42, 0.22, 0.72);
+      float vMask = smoothstep(0.62, 0.88, f * f2) * 0.05;
+
+      vec3 col = bg
+               + indigo * iMask
+               + cyan   * cMask
+               + violet * vMask
+               + vec3(0.25, 0.38, 0.72) * mw;
+
+      /* soft vignette — darkens edges */
+      vec2 vig = uv - 0.5;
+      col *= 1.0 - dot(vig, vig) * 1.4;
+
+      col = clamp(col, 0.0, 1.0);
+      gl_FragColor = vec4(col, 1.0);
     }
   `;
 
