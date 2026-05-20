@@ -675,14 +675,14 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
     void main(){
       vec2 uv    = gl_FragCoord.xy / u_res;
       vec2 mouse = u_mouse / u_res;
-      float t    = u_time * 0.09;
+      float t    = u_time * 0.13;
 
-      /* two slow organic blobs drifting — very calm */
-      vec2 p1 = uv * 1.8 + vec2(t * 0.22, t * 0.13);
-      vec2 p2 = uv * 2.2 + vec2(-t * 0.15, t * 0.19);
+      /* two slow organic blobs drifting — clearly visible */
+      vec2 p1 = uv * 1.4 + vec2(t * 0.28, t * 0.17);
+      vec2 p2 = uv * 1.7 + vec2(-t * 0.19, t * 0.23);
       float f1 = fbm(p1);
-      float f2 = fbm(p2 + f1 * 0.4);
-      float f  = fbm(p2 + f2 * 0.5);
+      float f2 = fbm(p2 + f1 * 0.55);
+      float f  = fbm(p2 + f2 * 0.65);
 
       /* mouse warmth — subtle bright patch follows cursor */
       float md = length(uv - mouse);
@@ -691,23 +691,28 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       /* pure near-black base */
       vec3 bg = vec3(0.027, 0.035, 0.059);
 
-      /* indigo cloud — barely there */
+      /* indigo cloud — clearly visible */
       vec3 indigo = vec3(0.22, 0.24, 0.72);
-      float iMask = smoothstep(0.38, 0.72, f) * 0.13;
+      float iMask = smoothstep(0.32, 0.68, f) * 0.42;
 
-      /* cyan accent — even more subtle, only at peaks */
+      /* cyan accent — visible at peaks */
       vec3 cyan = vec3(0.04, 0.55, 0.72);
-      float cMask = smoothstep(0.58, 0.82, f2) * 0.07;
+      float cMask = smoothstep(0.48, 0.78, f2) * 0.28;
 
-      /* violet hint */
+      /* violet hint — visible blend layer */
       vec3 violet = vec3(0.42, 0.22, 0.72);
-      float vMask = smoothstep(0.62, 0.88, f * f2) * 0.05;
+      float vMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
+
+      /* bright core where blobs peak */
+      float peak = smoothstep(0.64, 0.88, f) * smoothstep(0.60, 0.85, f2);
+      vec3 coreCol = vec3(0.55, 0.48, 1.00) * peak * 0.18;
 
       vec3 col = bg
                + indigo * iMask
                + cyan   * cMask
                + violet * vMask
-               + vec3(0.25, 0.38, 0.72) * mw;
+               + coreCol
+               + vec3(0.30, 0.45, 0.85) * mw * 1.8;
 
       /* soft vignette — darkens edges */
       vec2 vig = uv - 0.5;
