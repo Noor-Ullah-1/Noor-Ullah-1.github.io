@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Noor Ullah</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="icon" type="image/png" href="favicon.png"/>
-<style>
+<link rel="icon" type="image/png" href="favicon.png"/><style>
 :root {
   --bg:#07090f;--bg2:#0c0f1a;--surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);
   --border:rgba(255,255,255,0.08);--indigo:#6366f1;--indigo2:#4f51d4;--cyan:#06b6d4;
@@ -688,31 +687,31 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       float md = length(uv - mouse);
       float mw = exp(-md * md * 5.5) * 0.08;
 
-      /* pure near-black base */
-      vec3 bg = vec3(0.027, 0.035, 0.059);
+      /* deep black ember base */
+      vec3 bg = vec3(0.018, 0.010, 0.008);
 
-      /* indigo cloud — clearly visible */
-      vec3 indigo = vec3(0.22, 0.24, 0.72);
+      /* burnt red blob — main cloud */
+      vec3 red = vec3(0.65, 0.12, 0.04);
       float iMask = smoothstep(0.32, 0.68, f) * 0.42;
 
-      /* cyan accent — visible at peaks */
-      vec3 cyan = vec3(0.04, 0.55, 0.72);
+      /* dark orange accent */
+      vec3 orange = vec3(0.80, 0.32, 0.04);
       float cMask = smoothstep(0.48, 0.78, f2) * 0.28;
 
-      /* violet hint — visible blend layer */
-      vec3 violet = vec3(0.42, 0.22, 0.72);
+      /* deep amber layer */
+      vec3 amber = vec3(0.72, 0.22, 0.02);
       float vMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
 
-      /* bright core where blobs peak */
+      /* ember peak glow — hot orange-white at brightest points */
       float peak = smoothstep(0.64, 0.88, f) * smoothstep(0.60, 0.85, f2);
-      vec3 coreCol = vec3(0.55, 0.48, 1.00) * peak * 0.18;
+      vec3 coreCol = vec3(1.00, 0.55, 0.18) * peak * 0.22;
 
       vec3 col = bg
-               + indigo * iMask
-               + cyan   * cMask
-               + violet * vMask
+               + red    * iMask
+               + orange * cMask
+               + amber  * vMask
                + coreCol
-               + vec3(0.30, 0.45, 0.85) * mw * 1.8;
+               + vec3(0.90, 0.40, 0.10) * mw * 1.8;
 
       /* soft vignette — darkens edges */
       vec2 vig = uv - 0.5;
