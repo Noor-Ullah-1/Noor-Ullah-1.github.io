@@ -57,9 +57,10 @@ nav.scrolled{background:rgba(7,9,15,.88);backdrop-filter:blur(20px) saturate(1.6
 .eyebrow{display:inline-flex;align-items:center;gap:.55rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.28);padding:.3rem .9rem;border-radius:100px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:1.75rem;width:fit-content}
 .livdot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.hname{font-size:clamp(3.2rem,6.5vw,6.8rem);font-weight:900;line-height:.92;letter-spacing:-.035em;margin-bottom:.6rem;position:relative}
-.hname .fn{display:block;color:var(--text)}
-.hname .ln{display:block;background:linear-gradient(118deg,var(--indigo) 0%,var(--cyan) 48%,var(--violet) 100%);background-size:200% 200%;animation:gshift 5.5s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hname{font-size:clamp(2.4rem,5vw,5.4rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-bottom:.6rem;position:relative;white-space:nowrap}
+.hname .fn{display:inline;color:var(--text)}
+.hname .ln{display:inline;background:linear-gradient(118deg,var(--indigo) 0%,var(--cyan) 48%,var(--violet) 100%);background-size:200% 200%;animation:gshift 5.5s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+@media(max-width:699px){ .hname{white-space:normal} }
 #name-canvas{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s ease;cursor:default}
 .hname.particled #name-canvas{opacity:1}
 .hname.particled .fn,.hname.particled .ln{opacity:0;pointer-events:none}
@@ -230,7 +231,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
     <div class="hero-grid">
       <div class="hero-left">
         <div class="eyebrow a1"><div class="livdot"></div><span id="hero-status"></span></div>
-        <h1 class="hname a2"><span class="fn" id="hero-firstname"></span><span class="ln" id="hero-lastname"></span><canvas id="name-canvas" aria-hidden="true"></canvas></h1>
+        <h1 class="hname a2"><span class="fn" id="hero-firstname"></span> <span class="ln" id="hero-lastname"></span><canvas id="name-canvas" aria-hidden="true"></canvas></h1>
         <p class="hrole a3" id="hero-role"></p>
         <p class="hdesc a4" id="hero-desc"></p>
         <div class="hbtns a5">
@@ -844,7 +845,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const ctx = canvas.getContext('2d', { alpha:true });
   if(!ctx) return;
 
-  const BUCKETS = 12;
+  const BUCKETS = 16;
   let particles = [];
   let buckets   = Array.from({length:BUCKETS},()=>[]);
   let visible = true;   // hero section in viewport
@@ -852,9 +853,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const WAKE_MARGIN = 90;
 
   function lerp(a,b,t){ return a+(b-a)*t; }
-  function lastnameColor(t){
-    if(t<=.48){ const k=t/.48; return [lerp(99,6,k),lerp(102,182,k),lerp(241,212,k)]; }
-    const k=(t-.48)/.52; return [lerp(6,139,k),lerp(182,92,k),lerp(212,246,k)];
+  function themeColor(t){ // indigo → cyan → violet, sweeping across the whole name
+    t = Math.max(0, Math.min(1, t));
+    if(t<=.5){ const k=t/.5; return [lerp(99,6,k),lerp(102,182,k),lerp(241,212,k)]; }
+    const k=(t-.5)/.5; return [lerp(6,139,k),lerp(182,92,k),lerp(212,246,k)];
   }
 
   function build(){
@@ -870,33 +872,30 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     octx.fillStyle = '#fff';
     octx.textBaseline = 'alphabetic';
 
-    const fnRect = fnEl.getBoundingClientRect(), lnRect = lnEl.getBoundingClientRect();
-    const fnCS = getComputedStyle(fnEl), lnCS = getComputedStyle(lnEl);
-    const fnTop = fnRect.top - rect.top, lnTop = lnRect.top - rect.top;
-
-    octx.font = `${fnCS.fontWeight} ${fnCS.fontSize} ${fnCS.fontFamily}`;
-    octx.fillText(fnEl.textContent, 0, fnTop + fnRect.height*0.8);
-    octx.font = `${lnCS.fontWeight} ${lnCS.fontSize} ${lnCS.fontFamily}`;
-    octx.fillText(lnEl.textContent, 0, lnTop + lnRect.height*0.8);
+    const cs = getComputedStyle(fnEl); // fn & ln share font family/weight/size — one line now
+    octx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    octx.fillText(`${fnEl.textContent} ${lnEl.textContent}`, 0, h*0.78);
 
     let img;
     try { img = octx.getImageData(0,0,w,h).data; } catch(e){ return; }
 
-    const gap = w > 900 ? 4 : 3;
+    const gap = w > 750 ? 3 : 2;
     const rawPts = [];
     for(let y=0; y<h; y+=gap){
       for(let x=0; x<w; x+=gap){
-        if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y, isLast: y >= lnTop - 2});
+        if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y});
       }
     }
-    const MAX = 2000;
+    const MAX = 4200;
     const step = rawPts.length > MAX ? Math.ceil(rawPts.length/MAX) : 1;
 
     particles = [];
     buckets = Array.from({length:BUCKETS},()=>[]);
     for(let i=0;i<rawPts.length;i+=step){
-      const pt = rawPts[i], t = pt.x / w;
-      const rgb = pt.isLast ? lastnameColor(t) : [240,242,255];
+      const pt = rawPts[i];
+      const jitter = (Math.random()-.5)*0.16; // organic per-particle blend instead of hard bands
+      const t = Math.max(0, Math.min(1, pt.x/w + jitter));
+      const rgb = themeColor(t);
       const bi = Math.max(0,Math.min(BUCKETS-1, Math.floor(t*BUCKETS)));
       const p = {
         ox:pt.x, oy:pt.y,
