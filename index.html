@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#07090f"/>
 <title>Noor Ullah</title>
 <link rel="icon" type="image/png" href="icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -54,17 +57,25 @@ nav.scrolled{background:rgba(7,9,15,.88);backdrop-filter:blur(20px) saturate(1.6
 .eyebrow{display:inline-flex;align-items:center;gap:.55rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.28);padding:.3rem .9rem;border-radius:100px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:1.75rem;width:fit-content}
 .livdot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.hname{font-size:clamp(3.2rem,6.5vw,6.8rem);font-weight:900;line-height:.92;letter-spacing:-.035em;margin-bottom:.6rem}
+.hname{font-size:clamp(3.2rem,6.5vw,6.8rem);font-weight:900;line-height:.92;letter-spacing:-.035em;margin-bottom:.6rem;position:relative}
 .hname .fn{display:block;color:var(--text)}
 .hname .ln{display:block;background:linear-gradient(118deg,var(--indigo) 0%,var(--cyan) 48%,var(--violet) 100%);background-size:200% 200%;animation:gshift 5.5s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hname .letter{display:inline-block;will-change:transform;cursor:default}
-.hname .letter.space{width:.32em}
+#name-canvas{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s ease;cursor:default}
+.hname.particled #name-canvas{opacity:1}
+.hname.particled .fn,.hname.particled .ln{opacity:0;pointer-events:none}
 /* magnetic buttons/cards */
 .magnetic{will-change:transform}
 .tilt-card{transform-style:preserve-3d;will-change:transform;transition:border-color .32s,background .32s,transform .15s ease-out,box-shadow .4s}
 .tilt-card .ski,.tilt-card .skn,.tilt-card .skd,.tilt-card h3,.tilt-card p,.tilt-card .ptags,.tilt-card .edu-ico,.tilt-card .edu-deg,.tilt-card .edu-uni,.tilt-card .edu-yr{transform:translateZ(24px)}
 .tilt-glow{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle 180px at var(--mx,50%) var(--my,50%),rgba(99,102,241,.16),transparent 70%);opacity:0;transition:opacity .35s ease;pointer-events:none}
 .tilt-card:hover .tilt-glow{opacity:1}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  #sbg,#cv,.grain,.scanline{display:none}
+  #name-canvas{display:none}
+  .hname .fn,.hname .ln{opacity:1!important}
+}
 @keyframes gshift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .hrole{font-family:var(--mono);font-size:.85rem;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);margin-bottom:1.6rem}
 .hdesc{font-size:1.05rem;color:#9ca3af;line-height:1.82;max-width:510px;margin-bottom:2.4rem;font-weight:300}
@@ -219,7 +230,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
     <div class="hero-grid">
       <div class="hero-left">
         <div class="eyebrow a1"><div class="livdot"></div><span id="hero-status"></span></div>
-        <h1 class="hname a2"><span class="fn" id="hero-firstname"></span><span class="ln" id="hero-lastname"></span></h1>
+        <h1 class="hname a2"><span class="fn" id="hero-firstname"></span><span class="ln" id="hero-lastname"></span><canvas id="name-canvas" aria-hidden="true"></canvas></h1>
         <p class="hrole a3" id="hero-role"></p>
         <p class="hdesc a4" id="hero-desc"></p>
         <div class="hbtns a5">
@@ -505,13 +516,9 @@ const ME = {
   document.title = `${ME.firstName} ${ME.lastName} — ML Engineer`;
   set('nav-name', `${ME.firstName.toLowerCase()}.${ME.lastName.toLowerCase()}`);
 
-  const wrapLetters = str => str.split('').map(ch =>
-    ch === ' ' ? '<span class="letter space"> </span>' : `<span class="letter">${ch}</span>`
-  ).join('');
-
   set('hero-status',    ME.status);
-  set('hero-firstname', wrapLetters(ME.firstName));
-  set('hero-lastname',  wrapLetters(ME.lastName));
+  set('hero-firstname', ME.firstName);
+  set('hero-lastname',  ME.lastName);
   set('hero-role',      ME.role);
   set('hero-desc',      ME.heroDesc);
   set('hero-location',  ME.location);
@@ -620,18 +627,25 @@ let mx=0, my=0, rx=0, ry=0;
 document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
 (function tick(){ dot.style.left=mx+'px'; dot.style.top=my+'px'; rx+=(mx-rx)*.13; ry+=(my-ry)*.13; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(tick); })();
 
-/* ── SCROLL PROGRESS ── */
+/* ── SCROLL: progress bar + nav highlighting, combined & rAF-throttled ── */
 const prog = document.getElementById('progress');
-window.addEventListener('scroll', () => { prog.style.transform=`scaleX(${scrollY/(document.body.scrollHeight-innerHeight)})` }, { passive:true });
-
-/* ── NAV ── */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', scrollY>55);
-  const secs=[...document.querySelectorAll('section[id]')]; let cur='';
-  secs.forEach(s=>{ if(scrollY>=s.offsetTop-130) cur=s.id; });
-  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+const nav  = document.getElementById('nav');
+const navLinks = [...document.querySelectorAll('.nav-links a')];
+const sections = [...document.querySelectorAll('section[id]')];
+let scrollTicking = false;
+function onScrollFrame(){
+  const sy = scrollY;
+  prog.style.transform = `scaleX(${sy/(document.body.scrollHeight-innerHeight)})`;
+  nav.classList.toggle('scrolled', sy>55);
+  let cur='';
+  sections.forEach(s=>{ if(sy>=s.offsetTop-130) cur=s.id; });
+  navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+cur));
+  scrollTicking = false;
+}
+window.addEventListener('scroll', ()=>{
+  if(!scrollTicking){ scrollTicking=true; requestAnimationFrame(onScrollFrame); }
 }, { passive:true });
+onScrollFrame();
 
 /* ── SCROLL REVEAL ── */
 const obs = new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }); },{ threshold:.1 });
@@ -653,7 +667,8 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
 (function initShader() {
   const isMobile = window.innerWidth < 768 ||
     /Android|iPhone|iPad|iPod|webOS|BlackBerry/i.test(navigator.userAgent);
-  if (isMobile) { document.getElementById('sbg').style.display='none'; return; }
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (isMobile || reduceMotion) { document.getElementById('sbg').style.display='none'; return; }
 
   const canvas = document.getElementById('sbg');
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -770,6 +785,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
 
   const t0=performance.now();
   (function loop(){
+    if(document.hidden){ requestAnimationFrame(loop); return; }
     smx+=(tmx-smx)*.055; smy+=(tmy-smy)*.055;
     gl.uniform2f(uRes,canvas.width,canvas.height);
     gl.uniform1f(uTime,(performance.now()-t0)*.001);
@@ -781,9 +797,11 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
 
 /* ── PARTICLE CANVAS ── */
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'); let W,H,pts=[];
+const cvReduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
-function initPts(){ pts=[]; const n=Math.floor(W*H/17000); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.19,vy:(Math.random()-.5)*.19,r:Math.random()*1.4+.5}); }
+function initPts(){ pts=[]; const n=Math.min(140, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.19,vy:(Math.random()-.5)*.19,r:Math.random()*1.4+.5}); }
 function drawCv(){
+  if(document.hidden){ requestAnimationFrame(drawCv); return; }
   ctx.clearRect(0,0,W,H);
   pts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; });
   for(let i=0;i<pts.length;i++){
@@ -796,59 +814,145 @@ function drawCv(){
   requestAnimationFrame(drawCv);
 }
 window.addEventListener('resize',()=>{ resize(); initPts(); });
-resize(); initPts(); drawCv();
+resize(); initPts();
+if(!cvReduceMotion) drawCv();
 
 /* ── SMOOTH SCROLL ── */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',e=>{ const t=document.querySelector(a.getAttribute('href')); if(!t)return; e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); });
 });
 
-/* ── MAGNETIC HERO NAME — letters push away from cursor ── */
-(function magneticName(){
-  const isTouch = matchMedia('(hover:none)').matches;
-  if(isTouch) return;
-  let letters=[];
-  function collect(){
-    letters = [...document.querySelectorAll('.hname .letter:not(.space)')].map(el=>({
-      el, cx:0, cy:0, tx:0, ty:0, cur:0
-    }));
-    refreshRects();
+/* ── PARTICLE NAME — name rendered as interactive particles ── */
+(function particleName(){
+  const hname  = document.querySelector('.hname');
+  const fnEl   = document.getElementById('hero-firstname');
+  const lnEl   = document.getElementById('hero-lastname');
+  const canvas = document.getElementById('name-canvas');
+  if(!hname || !fnEl || !lnEl || !canvas) return;
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch      = matchMedia('(hover:none)').matches;
+  const isNarrow     = innerWidth < 700;
+  if(reduceMotion || isTouch || isNarrow) return; // plain gradient text stays — lighter, and touch has no hover to react to
+
+  const ctx = canvas.getContext('2d', { alpha:true });
+  if(!ctx) return;
+
+  const BUCKETS = 12;
+  let particles = [];
+  let buckets   = Array.from({length:BUCKETS},()=>[]);
+  let running   = false, raf = null;
+
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function lastnameColor(t){
+    if(t<=.48){ const k=t/.48; return [lerp(99,6,k),lerp(102,182,k),lerp(241,212,k)]; }
+    const k=(t-.48)/.52; return [lerp(6,139,k),lerp(182,92,k),lerp(212,246,k)];
   }
-  function refreshRects(){
-    letters.forEach(l=>{
-      const r=l.el.getBoundingClientRect();
-      l.cx = r.left + r.width/2;
-      l.cy = r.top + r.height/2;
-    });
+
+  function build(){
+    const rect = hname.getBoundingClientRect();
+    const w = Math.max(1,Math.ceil(rect.width)), h = Math.max(1,Math.ceil(rect.height));
+    if(!w || !h) return;
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = w+'px'; canvas.style.height = h+'px';
+
+    const off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    const octx = off.getContext('2d');
+    octx.fillStyle = '#fff';
+    octx.textBaseline = 'alphabetic';
+
+    const fnRect = fnEl.getBoundingClientRect(), lnRect = lnEl.getBoundingClientRect();
+    const fnCS = getComputedStyle(fnEl), lnCS = getComputedStyle(lnEl);
+    const fnTop = fnRect.top - rect.top, lnTop = lnRect.top - rect.top;
+
+    octx.font = `${fnCS.fontWeight} ${fnCS.fontSize} ${fnCS.fontFamily}`;
+    octx.fillText(fnEl.textContent, 0, fnTop + fnRect.height*0.8);
+    octx.font = `${lnCS.fontWeight} ${lnCS.fontSize} ${lnCS.fontFamily}`;
+    octx.fillText(lnEl.textContent, 0, lnTop + lnRect.height*0.8);
+
+    let img;
+    try { img = octx.getImageData(0,0,w,h).data; } catch(e){ return; }
+
+    const gap = w > 900 ? 4 : 3;
+    const rawPts = [];
+    for(let y=0; y<h; y+=gap){
+      for(let x=0; x<w; x+=gap){
+        if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y, isLast: y >= lnTop - 2});
+      }
+    }
+    const MAX = 2000;
+    const step = rawPts.length > MAX ? Math.ceil(rawPts.length/MAX) : 1;
+
+    particles = [];
+    buckets = Array.from({length:BUCKETS},()=>[]);
+    for(let i=0;i<rawPts.length;i+=step){
+      const pt = rawPts[i], t = pt.x / w;
+      const rgb = pt.isLast ? lastnameColor(t) : [240,242,255];
+      const bi = Math.max(0,Math.min(BUCKETS-1, Math.floor(t*BUCKETS)));
+      const p = {
+        ox:pt.x, oy:pt.y,
+        x: pt.x+(Math.random()-.5)*60, y: pt.y+(Math.random()-.5)*60,
+        vx:0, vy:0, r: Math.random()*.9+.55,
+        color: `rgb(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0})`
+      };
+      particles.push(p); buckets[bi].push(p);
+    }
   }
-  const RADIUS=130, MAX_PUSH=22, MAX_SCALE=.34;
-  (function loop(){
-    letters.forEach(l=>{
-      const dx=l.cx-mx, dy=l.cy-my, dist=Math.hypot(dx,dy);
-      if(dist<RADIUS){
-        const p=1-dist/RADIUS;
-        const ang=Math.atan2(dy,dx);
-        l.tx=Math.cos(ang)*p*MAX_PUSH; l.ty=Math.sin(ang)*p*MAX_PUSH; l.cur=1+p*MAX_SCALE*.5-p*.06;
-      } else { l.tx=0; l.ty=0; l.cur=1; }
-      l._x=(l._x||0)+(l.tx-(l._x||0))*.18;
-      l._y=(l._y||0)+(l.ty-(l._y||0))*.18;
-      l._s=(l._s===undefined?1:l._s)+(l.cur-(l._s===undefined?1:l._s))*.18;
-      l.el.style.transform=`translate(${l._x.toFixed(2)}px,${l._y.toFixed(2)}px) scale(${l._s.toFixed(3)})`;
-    });
-    requestAnimationFrame(loop);
-  })();
-  window.addEventListener('load',()=>setTimeout(collect,60));
-  window.addEventListener('resize',refreshRects);
-  window.addEventListener('scroll',refreshRects,{passive:true});
-  setTimeout(collect,120);
-  setTimeout(refreshRects,900);   // after hero entrance animation settles
-  setTimeout(refreshRects,1600);
-  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>refreshRects()); }
+
+  function animate(){
+    raf = null;
+    if(!running) return;
+    if(document.hidden){ raf=requestAnimationFrame(animate); return; }
+    const rect = canvas.getBoundingClientRect();
+    const lx = mx-rect.left, ly = my-rect.top;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const R=68, R2=R*R;
+    for(let b=0;b<BUCKETS;b++){
+      const arr=buckets[b];
+      if(!arr.length) continue;
+      ctx.fillStyle = arr[0].color;
+      for(let i=0;i<arr.length;i++){
+        const p=arr[i];
+        const dx=p.x-lx, dy=p.y-ly, d2=dx*dx+dy*dy;
+        if(d2<R2){ const d=Math.sqrt(d2)||.01, f=(R-d)/R; p.vx+=(dx/d)*f*3; p.vy+=(dy/d)*f*3; }
+        p.vx+=(p.ox-p.x)*.05; p.vy+=(p.oy-p.y)*.05;
+        p.vx*=.82; p.vy*=.82;
+        p.x+=p.vx; p.y+=p.vy;
+        ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
+      }
+    }
+    raf=requestAnimationFrame(animate);
+  }
+  function start(){ running=true; if(raf===null) raf=requestAnimationFrame(animate); }
+  function stop(){ running=false; }
+
+  canvas.addEventListener('click', ()=>{
+    particles.forEach(p=>{ p.vx+=(Math.random()-.5)*16; p.vy+=(Math.random()-.5)*16-6; });
+  });
+
+  let resizeT;
+  window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(build,220); });
+
+  new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) start(); else stop(); });
+  }, { threshold:0 }).observe(document.getElementById('hero'));
+
+  function init(){
+    build();
+    if(particles.length){
+      hname.classList.add('particled');
+      start();
+      setTimeout(build,1000); // re-sync once the hero entrance animation settles
+    }
+  }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>setTimeout(init,50)); }
+  else { setTimeout(init,300); }
 })();
 
 /* ── MAGNETIC BUTTONS — pull toward cursor when nearby ── */
 (function magneticButtons(){
-  const isTouch = matchMedia('(hover:none)').matches;
+  const isTouch = matchMedia('(hover:none)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(isTouch) return;
   document.querySelectorAll('.magnetic').forEach(btn=>{
     let bx=0, by=0, tx=0, ty=0;
@@ -868,7 +972,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
 
 /* ── 3D TILT CARDS ── */
 (function tiltCards(){
-  const isTouch = matchMedia('(hover:none)').matches;
+  const isTouch = matchMedia('(hover:none)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(isTouch) return;
   function bind(card){
     card.addEventListener('mousemove', e=>{
