@@ -57,6 +57,14 @@ nav.scrolled{background:rgba(7,9,15,.88);backdrop-filter:blur(20px) saturate(1.6
 .hname{font-size:clamp(3.2rem,6.5vw,6.8rem);font-weight:900;line-height:.92;letter-spacing:-.035em;margin-bottom:.6rem}
 .hname .fn{display:block;color:var(--text)}
 .hname .ln{display:block;background:linear-gradient(118deg,var(--indigo) 0%,var(--cyan) 48%,var(--violet) 100%);background-size:200% 200%;animation:gshift 5.5s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hname .letter{display:inline-block;will-change:transform;cursor:default}
+.hname .letter.space{width:.32em}
+/* magnetic buttons/cards */
+.magnetic{will-change:transform}
+.tilt-card{transform-style:preserve-3d;will-change:transform;transition:border-color .32s,background .32s,transform .15s ease-out,box-shadow .4s}
+.tilt-card .ski,.tilt-card .skn,.tilt-card .skd,.tilt-card h3,.tilt-card p,.tilt-card .ptags,.tilt-card .edu-ico,.tilt-card .edu-deg,.tilt-card .edu-uni,.tilt-card .edu-yr{transform:translateZ(24px)}
+.tilt-glow{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle 180px at var(--mx,50%) var(--my,50%),rgba(99,102,241,.16),transparent 70%);opacity:0;transition:opacity .35s ease;pointer-events:none}
+.tilt-card:hover .tilt-glow{opacity:1}
 @keyframes gshift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .hrole{font-family:var(--mono);font-size:.85rem;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);margin-bottom:1.6rem}
 .hdesc{font-size:1.05rem;color:#9ca3af;line-height:1.82;max-width:510px;margin-bottom:2.4rem;font-weight:300}
@@ -202,7 +210,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
       <li><a href="#education">Education</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
-    <a href="#contact" class="nav-cta">Hire Me</a>
+    <a href="#contact" class="nav-cta magnetic">Hire Me</a>
   </div>
 </nav>
 
@@ -215,8 +223,8 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
         <p class="hrole a3" id="hero-role"></p>
         <p class="hdesc a4" id="hero-desc"></p>
         <div class="hbtns a5">
-          <a href="#projects" class="btn-p">View Projects ↗</a>
-          <a id="resume-dl" class="btn-g">Download CV ↓</a>
+          <a href="#projects" class="btn-p magnetic">View Projects ↗</a>
+          <a id="resume-dl" class="btn-g magnetic">Download CV ↓</a>
         </div>
         <div class="hstats a6" id="hero-stats"></div>
       </div>
@@ -497,9 +505,13 @@ const ME = {
   document.title = `${ME.firstName} ${ME.lastName} — ML Engineer`;
   set('nav-name', `${ME.firstName.toLowerCase()}.${ME.lastName.toLowerCase()}`);
 
+  const wrapLetters = str => str.split('').map(ch =>
+    ch === ' ' ? '<span class="letter space"> </span>' : `<span class="letter">${ch}</span>`
+  ).join('');
+
   set('hero-status',    ME.status);
-  set('hero-firstname', ME.firstName);
-  set('hero-lastname',  ME.lastName);
+  set('hero-firstname', wrapLetters(ME.firstName));
+  set('hero-lastname',  wrapLetters(ME.lastName));
   set('hero-role',      ME.role);
   set('hero-desc',      ME.heroDesc);
   set('hero-location',  ME.location);
@@ -519,7 +531,8 @@ const ME = {
   href('resume-open', ME.resumeFile);
 
   set('skills-featured', ME.featuredSkills.map((s, i) =>
-    `<div class="skcard reveal d${i+1}">
+    `<div class="skcard reveal d${i+1} tilt-card">
+      <div class="tilt-glow"></div>
       <span class="ski">${s.icon}</span>
       <div class="skn">${s.name}</div>
       <div class="skd">${s.desc}</div>
@@ -531,7 +544,8 @@ const ME = {
   ).join(''));
 
   set('projects-grid', ME.projects.map((p, i) =>
-    `<div class="pcard reveal d${i+1}">
+    `<div class="pcard reveal d${i+1} tilt-card">
+      <div class="tilt-glow"></div>
       <div class="pcard-top"><span class="pcat">${p.category}</span><span class="pmet">${p.metric}</span></div>
       <h3>${p.title}</h3>
       <p>${p.desc}</p>
@@ -556,7 +570,8 @@ const ME = {
   ).join(''));
 
   set('education-grid', ME.education.map((e, i) =>
-    `<div class="educard reveal d${i+1}">
+    `<div class="educard reveal d${i+1} tilt-card">
+      <div class="tilt-glow"></div>
       <div class="edu-ico">${e.icon}</div>
       <div class="edu-deg">${e.degree}</div>
       <div class="edu-uni">${e.uni}</div>
@@ -787,6 +802,90 @@ resize(); initPts(); drawCv();
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',e=>{ const t=document.querySelector(a.getAttribute('href')); if(!t)return; e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); });
 });
+
+/* ── MAGNETIC HERO NAME — letters push away from cursor ── */
+(function magneticName(){
+  const isTouch = matchMedia('(hover:none)').matches;
+  if(isTouch) return;
+  let letters=[];
+  function collect(){
+    letters = [...document.querySelectorAll('.hname .letter:not(.space)')].map(el=>({
+      el, cx:0, cy:0, tx:0, ty:0, cur:0
+    }));
+    refreshRects();
+  }
+  function refreshRects(){
+    letters.forEach(l=>{
+      const r=l.el.getBoundingClientRect();
+      l.cx = r.left + r.width/2;
+      l.cy = r.top + r.height/2;
+    });
+  }
+  const RADIUS=130, MAX_PUSH=22, MAX_SCALE=.34;
+  (function loop(){
+    letters.forEach(l=>{
+      const dx=l.cx-mx, dy=l.cy-my, dist=Math.hypot(dx,dy);
+      if(dist<RADIUS){
+        const p=1-dist/RADIUS;
+        const ang=Math.atan2(dy,dx);
+        l.tx=Math.cos(ang)*p*MAX_PUSH; l.ty=Math.sin(ang)*p*MAX_PUSH; l.cur=1+p*MAX_SCALE*.5-p*.06;
+      } else { l.tx=0; l.ty=0; l.cur=1; }
+      l._x=(l._x||0)+(l.tx-(l._x||0))*.18;
+      l._y=(l._y||0)+(l.ty-(l._y||0))*.18;
+      l._s=(l._s===undefined?1:l._s)+(l.cur-(l._s===undefined?1:l._s))*.18;
+      l.el.style.transform=`translate(${l._x.toFixed(2)}px,${l._y.toFixed(2)}px) scale(${l._s.toFixed(3)})`;
+    });
+    requestAnimationFrame(loop);
+  })();
+  window.addEventListener('load',()=>setTimeout(collect,60));
+  window.addEventListener('resize',refreshRects);
+  window.addEventListener('scroll',refreshRects,{passive:true});
+  setTimeout(collect,120);
+  setTimeout(refreshRects,900);   // after hero entrance animation settles
+  setTimeout(refreshRects,1600);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>refreshRects()); }
+})();
+
+/* ── MAGNETIC BUTTONS — pull toward cursor when nearby ── */
+(function magneticButtons(){
+  const isTouch = matchMedia('(hover:none)').matches;
+  if(isTouch) return;
+  document.querySelectorAll('.magnetic').forEach(btn=>{
+    let bx=0, by=0, tx=0, ty=0;
+    btn.addEventListener('mousemove', e=>{
+      const r=btn.getBoundingClientRect();
+      tx=(e.clientX-(r.left+r.width/2))*.35;
+      ty=(e.clientY-(r.top+r.height/2))*.45;
+    });
+    btn.addEventListener('mouseleave', ()=>{ tx=0; ty=0; });
+    (function tick(){
+      bx+=(tx-bx)*.18; by+=(ty-by)*.18;
+      btn.style.transform=`translate(${bx.toFixed(2)}px,${by.toFixed(2)}px)`;
+      requestAnimationFrame(tick);
+    })();
+  });
+})();
+
+/* ── 3D TILT CARDS ── */
+(function tiltCards(){
+  const isTouch = matchMedia('(hover:none)').matches;
+  if(isTouch) return;
+  function bind(card){
+    card.addEventListener('mousemove', e=>{
+      const r=card.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+      const rotY=(px-.5)*14, rotX=(.5-py)*14;
+      card.style.transform=`perspective(800px) translateY(-7px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`;
+      card.style.setProperty('--mx', (px*100).toFixed(1)+'%');
+      card.style.setProperty('--my', (py*100).toFixed(1)+'%');
+    });
+    card.addEventListener('mouseleave', ()=>{ card.style.transform=''; });
+  }
+  document.querySelectorAll('.tilt-card').forEach(bind);
+  new MutationObserver(()=>{
+    document.querySelectorAll('.tilt-card:not([data-tilt-bound])').forEach(c=>{ c.dataset.tiltBound='1'; bind(c); });
+  }).observe(document.body,{childList:true,subtree:true});
+})();
 </script>
 </body>
 </html>
