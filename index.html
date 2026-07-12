@@ -784,9 +784,12 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
   rsz(); window.addEventListener('resize',rsz);
 
   const t0=performance.now();
+  let shaderFrame=0;
   (function loop(){
     if(document.hidden){ requestAnimationFrame(loop); return; }
-    smx+=(tmx-smx)*.055; smy+=(tmy-smy)*.055;
+    shaderFrame++;
+    if(shaderFrame % 2 === 0){ requestAnimationFrame(loop); return; } // ~30fps — this drifts slowly, no visible loss
+    smx+=(tmx-smx)*.11; smy+=(tmy-smy)*.11;
     gl.uniform2f(uRes,canvas.width,canvas.height);
     gl.uniform1f(uTime,(performance.now()-t0)*.001);
     gl.uniform2f(uMouse,smx,canvas.height-smy);
@@ -799,9 +802,12 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'); let W,H,pts=[];
 const cvReduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
-function initPts(){ pts=[]; const n=Math.min(140, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.19,vy:(Math.random()-.5)*.19,r:Math.random()*1.4+.5}); }
+function initPts(){ pts=[]; const n=Math.min(140, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.4+.5}); }
+let cvFrame=0;
 function drawCv(){
   if(document.hidden){ requestAnimationFrame(drawCv); return; }
+  cvFrame++;
+  if(cvFrame % 2 === 0){ requestAnimationFrame(drawCv); return; } // ~30fps — halves the O(n²) pairwise-distance cost
   ctx.clearRect(0,0,W,H);
   pts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; });
   for(let i=0;i<pts.length;i++){
@@ -841,7 +847,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const BUCKETS = 12;
   let particles = [];
   let buckets   = Array.from({length:BUCKETS},()=>[]);
-  let running   = false, raf = null;
+  let visible = true;   // hero section in viewport
+  let raf = null;       // non-null while a frame is scheduled; null = asleep
+  const WAKE_MARGIN = 90;
 
   function lerp(a,b,t){ return a+(b-a)*t; }
   function lastnameColor(t){
@@ -900,14 +908,20 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     }
   }
 
+  function scheduleFrame(){
+    if(raf === null && visible) raf = requestAnimationFrame(animate);
+  }
+
   function animate(){
     raf = null;
-    if(!running) return;
+    if(!visible) return;
     if(document.hidden){ raf=requestAnimationFrame(animate); return; }
     const rect = canvas.getBoundingClientRect();
     const lx = mx-rect.left, ly = my-rect.top;
+    const mouseNear = lx > -WAKE_MARGIN && lx < rect.width+WAKE_MARGIN && ly > -WAKE_MARGIN && ly < rect.height+WAKE_MARGIN;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     const R=68, R2=R*R;
+    let maxSpeed2 = 0;
     for(let b=0;b<BUCKETS;b++){
       const arr=buckets[b];
       if(!arr.length) continue;
@@ -919,31 +933,45 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         p.vx+=(p.ox-p.x)*.05; p.vy+=(p.oy-p.y)*.05;
         p.vx*=.82; p.vy*=.82;
         p.x+=p.vx; p.y+=p.vy;
+        const s2 = p.vx*p.vx+p.vy*p.vy;
+        if(s2>maxSpeed2) maxSpeed2=s2;
         ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
       }
     }
-    raf=requestAnimationFrame(animate);
+    // asleep once everything has settled and the cursor isn't nearby — saves ~2000 draws/frame when idle
+    if(maxSpeed2 < 0.0009 && !mouseNear) return;
+    raf = requestAnimationFrame(animate);
   }
-  function start(){ running=true; if(raf===null) raf=requestAnimationFrame(animate); }
-  function stop(){ running=false; }
+
+  // wake on approach — cheap bounding-box check, only runs while asleep
+  document.addEventListener('mousemove', ()=>{
+    if(raf !== null || !visible) return;
+    const rect = canvas.getBoundingClientRect();
+    if(mx > rect.left-WAKE_MARGIN && mx < rect.right+WAKE_MARGIN && my > rect.top-WAKE_MARGIN && my < rect.bottom+WAKE_MARGIN) scheduleFrame();
+  });
 
   canvas.addEventListener('click', ()=>{
     particles.forEach(p=>{ p.vx+=(Math.random()-.5)*16; p.vy+=(Math.random()-.5)*16-6; });
+    scheduleFrame();
   });
 
   let resizeT;
-  window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(build,220); });
+  window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(()=>{ build(); scheduleFrame(); },220); });
 
   new IntersectionObserver(entries=>{
-    entries.forEach(e=>{ if(e.isIntersecting) start(); else stop(); });
+    entries.forEach(e=>{
+      visible = e.isIntersecting;
+      if(visible) scheduleFrame();
+      else if(raf!==null){ cancelAnimationFrame(raf); raf=null; }
+    });
   }, { threshold:0 }).observe(document.getElementById('hero'));
 
   function init(){
     build();
     if(particles.length){
       hname.classList.add('particled');
-      start();
-      setTimeout(build,1000); // re-sync once the hero entrance animation settles
+      scheduleFrame();
+      setTimeout(()=>{ build(); scheduleFrame(); },1000); // re-sync once the hero entrance animation settles
     }
   }
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>setTimeout(init,50)); }
@@ -955,18 +983,21 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const isTouch = matchMedia('(hover:none)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(isTouch) return;
   document.querySelectorAll('.magnetic').forEach(btn=>{
-    let bx=0, by=0, tx=0, ty=0;
+    let bx=0, by=0, tx=0, ty=0, raf=null;
+    function tick(){
+      bx+=(tx-bx)*.18; by+=(ty-by)*.18;
+      btn.style.transform=`translate(${bx.toFixed(2)}px,${by.toFixed(2)}px)`;
+      if(tx===0 && ty===0 && Math.abs(bx)<0.05 && Math.abs(by)<0.05){ raf=null; return; } // settled — stop looping
+      raf=requestAnimationFrame(tick);
+    }
+    function wake(){ if(raf===null) raf=requestAnimationFrame(tick); }
     btn.addEventListener('mousemove', e=>{
       const r=btn.getBoundingClientRect();
       tx=(e.clientX-(r.left+r.width/2))*.35;
       ty=(e.clientY-(r.top+r.height/2))*.45;
+      wake();
     });
-    btn.addEventListener('mouseleave', ()=>{ tx=0; ty=0; });
-    (function tick(){
-      bx+=(tx-bx)*.18; by+=(ty-by)*.18;
-      btn.style.transform=`translate(${bx.toFixed(2)}px,${by.toFixed(2)}px)`;
-      requestAnimationFrame(tick);
-    })();
+    btn.addEventListener('mouseleave', ()=>{ tx=0; ty=0; wake(); });
   });
 })();
 
