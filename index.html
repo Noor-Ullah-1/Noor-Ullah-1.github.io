@@ -12,12 +12,12 @@
 <style>
 :root {
   /* ==========================================================================
-     ACTIVE THEME — dark teal-black / mint green / coral
+     ACTIVE THEME — dark teal-black / mint green / red
      Colors are defined as R,G,B triplets (--accentN-rgb) so both the CSS below
      AND the JS-drawn canvases (particle name, background dust, ambient shader)
      read from these SAME values — change a palette here and everything follows.
      Only 2 accent colors were given, so --accent3 is aliased to --accent2
-     (the 3-stop gradients below simply settle into solid coral for their
+     (the 3-stop gradients below simply settle into solid red for their
      second half instead of shifting to a 3rd hue).
 
      TO REVERT TO THE ORIGINAL INDIGO/CYAN/VIOLET LOOK:
@@ -28,8 +28,8 @@
   --bg:#0c1011;--bg2:#121a1b;--surface:rgba(238,244,242,0.045);--surface2:rgba(238,244,242,0.075);
   --border:rgba(238,244,242,0.09);--text:#eef4f2;--muted:#8a9997;
   --accent1-rgb:62,207,142;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#2b9163;
-  --accent2-rgb:228,105,94;--accent2:rgb(var(--accent2-rgb));
-  --accent3-rgb:228,105,94;--accent3:rgb(var(--accent3-rgb));
+  --accent2-rgb:229,72,77;--accent2:rgb(var(--accent2-rgb));
+  --accent3-rgb:229,72,77;--accent3:rgb(var(--accent3-rgb));
   --green:var(--accent1);
   --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;--ease:cubic-bezier(0.22,1,0.36,1);
 
@@ -65,8 +65,8 @@ a{color:inherit;text-decoration:none}
 .grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(150,165,163,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(150,165,163,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)} /* original grid line color: rgba(148,163,184,.045) */
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
 .scanline{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(to bottom,transparent 50%,rgba(var(--accent1-rgb),.012) 50%);background-size:100% 4px}
-#sbg{position:fixed;inset:0;z-index:0;pointer-events:none;}
-#cv{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.13}
+#sbg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#cv{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.13}
 .wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem;position:relative;z-index:2}
 nav{position:fixed;top:0;width:100%;z-index:500;padding:1.2rem 0;transition:background .45s ease,box-shadow .45s ease}
 nav.scrolled{background:rgba(12,16,17,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
@@ -230,7 +230,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 .fbrand{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
 .fbrand span{color:var(--accent1)}
 .fnote{font-family:var(--mono);font-size:.66rem;color:rgba(238,244,242,.14)}
-@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:3rem}.hero-right{order:-1}.prof-wrap{width:240px;height:240px}.sfeat{grid-template-columns:1fr 1fr}.pgrid{grid-template-columns:1fr 1fr}.eitem{grid-template-columns:1fr;gap:.5rem}.etl::before,.edot{display:none}.eleft{padding-left:0}.edugrid{grid-template-columns:1fr}.certgrid{grid-template-columns:1fr}.ctinner{grid-template-columns:1fr;gap:3rem}#resume .rcard{grid-template-columns:1fr}}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:3rem}.hero-right{order:-1}.prof-wrap{width:240px;height:240px}.sfeat{grid-template-columns:1fr 1fr}.pgrid{grid-template-columns:1fr 1fr}.eitem{grid-template-columns:1fr;gap:.5rem}.etl::before,.edot{display:none}.eleft{padding-left:0}.edugrid{grid-template-columns:1fr}.certgrid{grid-template-columns:1fr}.ctinner{grid-template-columns:1fr;gap:3rem}#resume .rcard{grid-template-columns:1fr}
+  .hero-left{text-align:center}
+  .hbtns{justify-content:center}.hstats{justify-content:center}
+}
 @media(max-width:620px){.nav-links{display:none}.sfeat,.pgrid{grid-template-columns:1fr}.wrap{padding:0 1.25rem}.hstats{gap:1.5rem}}
 @media(hover:none){body{cursor:auto}.cdot,.cring{display:none}}
 </style>
@@ -554,8 +557,8 @@ function cssRGB(varName, fallback){
   return (parts.length === 3 && parts.every(n => !isNaN(n))) ? parts : fallback;
 }
 const ACCENT1 = cssRGB('--accent1-rgb', [62,207,142]);  // mint green #3ecf8e
-const ACCENT2 = cssRGB('--accent2-rgb', [228,105,94]);   // coral #e4695e
-const ACCENT3 = cssRGB('--accent3-rgb', [228,105,94]);   // aliased to accent2 (only 2 colors given)
+const ACCENT2 = cssRGB('--accent2-rgb', [229,72,77]);   // red #e5484d
+const ACCENT3 = cssRGB('--accent3-rgb', [229,72,77]);   // aliased to accent2 (only 2 colors given)
 const ACCENT1_STR = ACCENT1.join(',');
 
 /* ── RENDER ── */
@@ -773,7 +776,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       float mw = exp(-md * md * 5.5) * 0.08;
 
       /* ============================================================
-         ACTIVE THEME — dark teal-black base + mint-green / coral clouds
+         ACTIVE THEME — dark teal-black base + mint-green / red clouds
          (only 2 accent colors were given, so the 3rd "bridge" cloud below
          is a blend of the two, not a separately invented hue)
          ORIGINAL (indigo/cyan/violet) values are commented after each
@@ -786,12 +789,12 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       vec3 green = vec3(0.18, 0.61, 0.42);        // was indigo vec3(0.22, 0.24, 0.72)
       float gMask = smoothstep(0.32, 0.68, f) * 0.42;
 
-      /* green→coral blend — bridging tone, visible at peaks */
-      vec3 amber = vec3(0.34, 0.37, 0.28);        // was cyan vec3(0.04, 0.55, 0.72)
+      /* green→red blend — bridging tone, visible at peaks */
+      vec3 amber = vec3(0.34, 0.33, 0.26);        // was cyan vec3(0.04, 0.55, 0.72)
       float aMask = smoothstep(0.48, 0.78, f2) * 0.28;
 
-      /* coral cloud — visible blend layer */
-      vec3 orange = vec3(0.63, 0.29, 0.26);       // was violet vec3(0.42, 0.22, 0.72)
+      /* red cloud — visible blend layer */
+      vec3 orange = vec3(0.63, 0.20, 0.21);       // was violet vec3(0.42, 0.22, 0.72)
       float oMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
 
       /* bright core where blobs peak */
@@ -803,7 +806,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
                + amber  * aMask
                + orange * oMask
                + coreCol
-               + vec3(0.75, 0.38, 0.32) * mw * 1.8;   // was vec3(0.30, 0.45, 0.85)
+               + vec3(0.67, 0.21, 0.23) * mw * 1.8;   // was vec3(0.30, 0.45, 0.85)
 
       /* soft vignette — darkens edges */
       vec2 vig = uv - 0.5;
@@ -908,7 +911,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   if(!ctx) return;
 
   const isTouch = matchMedia('(hover:none)').matches;
-  const BUCKETS = 16;
+  const BUCKETS = 3; // light (dominant) / green accent / red accent — matches the reference's sparse-fleck look
   let particles = [];
   let buckets   = Array.from({length:BUCKETS},()=>[]);
   let visible = true;   // hero section in viewport
@@ -916,13 +919,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const WAKE_MARGIN = isTouch ? 46 : 90;
   const DPR = Math.min(window.devicePixelRatio || 1, 2); // crisp on retina screens, capped so 3x phones don't triple the draw-buffer cost
   const probeCtx = document.createElement('canvas').getContext('2d');
+  const TEXT_RGB = [238,244,242]; // matches --text
 
-  function lerp(a,b,t){ return a+(b-a)*t; }
-  function themeColor(t){ // sweeps across the theme accents — follows CSS :root automatically
-    t = Math.max(0, Math.min(1, t));
-    if(t<=.5){ const k=t/.5; return [lerp(ACCENT1[0],ACCENT2[0],k),lerp(ACCENT1[1],ACCENT2[1],k),lerp(ACCENT1[2],ACCENT2[2],k)]; }
-    const k=(t-.5)/.5; return [lerp(ACCENT2[0],ACCENT3[0],k),lerp(ACCENT2[1],ACCENT3[1],k),lerp(ACCENT2[2],ACCENT3[2],k)];
+  function pickBucket(){
+    const r = Math.random();
+    if(r < 0.80) return 0;        // light — dominant, keeps the name legible
+    if(r < 0.90) return 1;        // green accent fleck
+    return 2;                     // red accent fleck
   }
+  const BUCKET_RGB = [TEXT_RGB, ACCENT1, ACCENT2];
 
   function build(){
     const rect = hname.getBoundingClientRect();
@@ -933,13 +938,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     const cs = getComputedStyle(fnEl); // fn & ln share font family/weight/size — one line now
     let fontPx = parseFloat(cs.fontSize);
 
-    // shrink-to-fit: guarantees the name always renders on ONE line, at any
-    // viewport width, regardless of the CSS clamp() value — this is what
-    // makes the effect reliable on narrow phone screens.
+    // scale-to-fit (grows AND shrinks): the name always fills the same
+    // proportion of its container on any screen size, instead of being
+    // capped by the CSS clamp()'s floor on narrow viewports.
     probeCtx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
     let textW = probeCtx.measureText(fullName).width;
-    const target = w * 0.95;
-    if(textW > target && textW > 0){ fontPx *= (target / textW); }
+    const target = w * 0.97;
+    if(textW > 0){ fontPx *= (target / textW); }
+    probeCtx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
+    textW = probeCtx.measureText(fullName).width;
 
     hname.classList.add('particled'); // locks the (invisible) fallback text to one line to match
 
@@ -957,7 +964,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     octx.fillStyle = '#fff';
     octx.textBaseline = 'alphabetic';
     octx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
-    octx.fillText(fullName, 0, h*0.76);
+    const offsetX = Math.max(0, (w - textW) / 2); // horizontally centered within the canvas
+    octx.fillText(fullName, offsetX, h*0.76);
 
     let img;
     try { img = octx.getImageData(0,0,w,h).data; } catch(e){ return; }
@@ -971,21 +979,19 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y});
       }
     }
-    const MAX = 2000;
+    const MAX = 1200; // reduced per feedback — clearer, less busy letterforms
     const step = rawPts.length > MAX ? Math.ceil(rawPts.length/MAX) : 1;
 
     particles = [];
     buckets = Array.from({length:BUCKETS},()=>[]);
     for(let i=0;i<rawPts.length;i+=step){
       const pt = rawPts[i];
-      const jitter = (Math.random()-.5)*0.16; // organic per-particle blend instead of hard bands
-      const t = Math.max(0, Math.min(1, pt.x/w + jitter));
-      const rgb = themeColor(t);
-      const bi = Math.max(0,Math.min(BUCKETS-1, Math.floor(t*BUCKETS)));
+      const bi = pickBucket();
+      const rgb = BUCKET_RGB[bi];
       const p = {
         ox:pt.x, oy:pt.y,
-        x: pt.x+(Math.random()-.5)*60, y: pt.y+(Math.random()-.5)*60,
-        vx:0, vy:0, r: Math.random()*.55+.85,
+        x: pt.x+(Math.random()-.5)*30, y: pt.y+(Math.random()-.5)*30, // tighter scatter — reads clearly right away
+        vx:0, vy:0, r: Math.random()*.7+1.0,
         color: `rgb(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0})`
       };
       particles.push(p); buckets[bi].push(p);
