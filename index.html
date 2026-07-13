@@ -1,32 +1,35 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="#15140f" name="theme-color"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0c1011"/>
 <title>Noor Ullah</title>
-<link href="icon.png" rel="icon" type="image/png"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
-<style>:root {
+<link rel="icon" type="image/png" href="icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
   /* ==========================================================================
-     ACTIVE THEME — warm gray / moss green / burnt orange
+     ACTIVE THEME — dark teal-black / mint green / coral
      Colors are defined as R,G,B triplets (--accentN-rgb) so both the CSS below
      AND the JS-drawn canvases (particle name, background dust, ambient shader)
      read from these SAME values — change a palette here and everything follows.
+     Only 2 accent colors were given, so --accent3 is aliased to --accent2
+     (the 3-stop gradients below simply settle into solid coral for their
+     second half instead of shifting to a 3rd hue).
 
      TO REVERT TO THE ORIGINAL INDIGO/CYAN/VIOLET LOOK:
      replace the 9 declarations below (from --bg through --green) with the
      9 declarations in the commented "ORIGINAL THEME" block further down.
      Nothing else in the file needs to change.
      ========================================================================== */
-  --bg:#15140f;--bg2:#1d1b14;--surface:rgba(240,235,222,0.045);--surface2:rgba(240,235,222,0.075);
-  --border:rgba(240,235,222,0.09);--text:#f1ede2;--muted:#9c9484;
-  --accent1-rgb:122,150,92;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#4f613c;
-  --accent2-rgb:212,158,64;--accent2:rgb(var(--accent2-rgb));
-  --accent3-rgb:209,105,58;--accent3:rgb(var(--accent3-rgb));
+  --bg:#0c1011;--bg2:#121a1b;--surface:rgba(238,244,242,0.045);--surface2:rgba(238,244,242,0.075);
+  --border:rgba(238,244,242,0.09);--text:#eef4f2;--muted:#8a9997;
+  --accent1-rgb:62,207,142;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#2b9163;
+  --accent2-rgb:228,105,94;--accent2:rgb(var(--accent2-rgb));
+  --accent3-rgb:228,105,94;--accent3:rgb(var(--accent3-rgb));
   --green:var(--accent1);
   --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;--ease:cubic-bezier(0.22,1,0.36,1);
 
@@ -41,15 +44,10 @@
   --accent3-rgb:139,92,246;--accent3:rgb(var(--accent3-rgb));
   --green:#22c55e;
 
-     Two more standalone spots were recolored and aren't wired to variables
-     (only used once each, so hardcoded) — revert these by hand if you want
-     the exact original back:
-       .bi   { color: #a5b4fc; }   (was light-indigo tag text, now #c3d6a8)
-       .bc   { color: #67e8f9; }   (was light-cyan tag text,   now #f0cf8a)
-       .grid background-image used rgba(148,163,184,...) (cool slate),
-         now rgba(168,158,140,...) (warm neutral)
-       The WebGL shader's cloud colors are hand-tuned separately —
-         see the commented originals inside the FRAG shader source below.
+     The .grid background pattern and the WebGL shader's cloud colors are
+     hand-tuned separately (not driven by the variables above) — see the
+     commented original values next to the .grid rule and inside the FRAG
+     shader source further down for their revert values.
      ========================================================================== */
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -64,14 +62,15 @@ a{color:inherit;text-decoration:none}
 .cdot.h{background:var(--accent2);transform:translate(-50%,-50%) scale(1.6)}
 .cring.h{width:56px;height:56px;border-color:var(--accent2)}
 .mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 12% 18%,rgba(var(--accent1-rgb),.10) 0%,transparent 60%),radial-gradient(ellipse 55% 38% at 88% 72%,rgba(var(--accent2-rgb),.08) 0%,transparent 55%),radial-gradient(ellipse 45% 45% at 52% 98%,rgba(var(--accent3-rgb),.06) 0%,transparent 60%)}
-.grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,158,140,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(168,158,140,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(150,165,163,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(150,165,163,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)} /* original grid line color: rgba(148,163,184,.045) */
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
 .scanline{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(to bottom,transparent 50%,rgba(var(--accent1-rgb),.012) 50%);background-size:100% 4px}
 #sbg{position:fixed;inset:0;z-index:0;pointer-events:none;}
 #cv{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.13}
 .wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem;position:relative;z-index:2}
 nav{position:fixed;top:0;width:100%;z-index:500;padding:1.2rem 0;transition:background .45s ease,box-shadow .45s ease}
-nav.scrolled{background:rgba(21,20,15,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
+nav.scrolled{background:rgba(12,16,17,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
+@media(max-width:768px){nav.scrolled{backdrop-filter:blur(8px) saturate(1.2);background:rgba(12,16,17,.94)}}
 .nav-i{display:flex;align-items:center;justify-content:space-between;max-width:1160px;margin:0 auto;padding:0 2.5rem}
 .nav-logo{display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em}
 .ldot{width:8px;height:8px;border-radius:50%;background:var(--accent1);box-shadow:0 0 10px var(--accent1);animation:ldotpulse 2.8s ease infinite}
@@ -90,10 +89,9 @@ nav.scrolled{background:rgba(21,20,15,.88);backdrop-filter:blur(20px) saturate(1
 .a3{animation:riseUp .7s .30s var(--ease) both}.a4{animation:riseUp .7s .42s var(--ease) both}
 .a5{animation:riseUp .7s .54s var(--ease) both}.a6{animation:riseUp .7s .66s var(--ease) both}
 .a7{animation:riseRight .85s .38s var(--ease) both}
-.eyebrow{display:inline-flex;align-items:center;gap:.55rem;background:rgba(var(--accent1-rgb),.1);border:1px solid rgba(var(--accent1-rgb),.28);padding:.3rem .9rem;border-radius:100px;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent1);margin-bottom:1.75rem;width:fit-content}
 .livdot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.hname{font-size:clamp(2.4rem,5vw,5.4rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-bottom:.6rem;position:relative}
+.hname{font-size:clamp(2.8rem,7.5vw,7.8rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-bottom:.6rem;position:relative}
 .hname.particled{white-space:nowrap}
 .hname .fn{display:inline;color:var(--text)}
 .hname .ln{display:inline;background:linear-gradient(118deg,var(--accent1) 0%,var(--accent2) 48%,var(--accent3) 100%);background-size:200% 200%;animation:gshift 5.5s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -101,8 +99,8 @@ nav.scrolled{background:rgba(21,20,15,.88);backdrop-filter:blur(20px) saturate(1
 .hname.particled #name-canvas{opacity:1}
 .hname.particled .fn,.hname.particled .ln{opacity:0;pointer-events:none}
 /* magnetic buttons/cards */
-.magnetic{will-change:transform}
-.tilt-card{transform-style:preserve-3d;will-change:transform;transition:border-color .32s,background .32s,transform .15s ease-out,box-shadow .4s}
+.tilt-card{transform-style:preserve-3d;transition:border-color .32s,background .32s,transform .15s ease-out,box-shadow .4s}
+@media(hover:hover){.magnetic{will-change:transform}.tilt-card{will-change:transform}}
 .tilt-card .ski,.tilt-card .skn,.tilt-card .skd,.tilt-card h3,.tilt-card p,.tilt-card .ptags,.tilt-card .edu-ico,.tilt-card .edu-deg,.tilt-card .edu-uni,.tilt-card .edu-yr{transform:translateZ(24px)}
 .tilt-glow{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle 180px at var(--mx,50%) var(--my,50%),rgba(var(--accent1-rgb),.16),transparent 70%);opacity:0;transition:opacity .35s ease;pointer-events:none}
 .tilt-card:hover .tilt-glow{opacity:1}
@@ -137,10 +135,6 @@ nav.scrolled{background:rgba(21,20,15,.88);backdrop-filter:blur(20px) saturate(1
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
 .pbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.88) brightness(.95);transition:filter .4s ease,transform .55s var(--ease)}
 .pbox:hover img{filter:saturate(1.08) brightness(1.04);transform:scale(1.04)}
-.pbadges{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);display:flex;gap:.45rem;white-space:nowrap}
-.badge{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.28rem .72rem;border-radius:100px;backdrop-filter:blur(12px)}
-.bi{background:rgba(var(--accent1-rgb),.14);border:1px solid rgba(var(--accent1-rgb),.32);color:#c3d6a8}
-.bc{background:rgba(var(--accent2-rgb),.12);border:1px solid rgba(var(--accent2-rgb),.28);color:#f0cf8a}
 .loc{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:2.8rem;letter-spacing:.05em}
 .gloc{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
 section{padding:7rem 0;position:relative;z-index:2}
@@ -155,7 +149,7 @@ section{padding:7rem 0;position:relative;z-index:2}
 .sfeat{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2.5rem}
 .skcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;overflow:hidden;transition:border-color .32s,background .32s,transform .4s var(--ease),box-shadow .4s}
 .skcard::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 65% 15%,rgba(var(--accent1-rgb),.08),transparent 55%);opacity:0;transition:opacity .38s}
-.skcard:hover{border-color:rgba(var(--accent1-rgb),.42);background:rgba(240,235,222,.055);transform:translateY(-7px);box-shadow:0 18px 52px rgba(0,0,0,.28),0 0 0 1px rgba(var(--accent1-rgb),.13)}
+.skcard:hover{border-color:rgba(var(--accent1-rgb),.42);background:rgba(238,244,242,.055);transform:translateY(-7px);box-shadow:0 18px 52px rgba(0,0,0,.28),0 0 0 1px rgba(var(--accent1-rgb),.13)}
 .skcard:hover::after{opacity:1}
 .ski{font-size:1.7rem;display:block;margin-bottom:1rem}
 .skn{font-size:1rem;font-weight:700;margin-bottom:.35rem}
@@ -235,7 +229,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 .finner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
 .fbrand{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
 .fbrand span{color:var(--accent1)}
-.fnote{font-family:var(--mono);font-size:.66rem;color:rgba(240,235,222,.14)}
+.fnote{font-family:var(--mono);font-size:.66rem;color:rgba(238,244,242,.14)}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:3rem}.hero-right{order:-1}.prof-wrap{width:240px;height:240px}.sfeat{grid-template-columns:1fr 1fr}.pgrid{grid-template-columns:1fr 1fr}.eitem{grid-template-columns:1fr;gap:.5rem}.etl::before,.edot{display:none}.eleft{padding-left:0}.edugrid{grid-template-columns:1fr}.certgrid{grid-template-columns:1fr}.ctinner{grid-template-columns:1fr;gap:3rem}#resume .rcard{grid-template-columns:1fr}}
 @media(max-width:620px){.nav-links{display:none}.sfeat,.pgrid{grid-template-columns:1fr}.wrap{padding:0 1.25rem}.hstats{gap:1.5rem}}
 @media(hover:none){body{cursor:auto}.cdot,.cring{display:none}}
@@ -248,122 +242,138 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 <div class="mesh"></div><div class="grid"></div><div class="grain"></div><div class="scanline"></div>
 <canvas id="sbg"></canvas>
 <canvas id="cv"></canvas>
+
 <nav id="nav">
-<div class="nav-i">
-<a class="nav-logo" href="#hero" id="nav-brand"><div class="ldot"></div><span id="nav-name"></span></a>
-<ul class="nav-links">
-<li><a href="#skills">Skills</a></li>
-<li><a href="#projects">Projects</a></li>
-<li><a href="#experience">Experience</a></li>
-<li><a href="#education">Education</a></li>
-<li><a href="#contact">Contact</a></li>
-</ul>
-<a class="nav-cta magnetic" href="#contact">Hire Me</a>
-</div>
+  <div class="nav-i">
+    <a href="#hero" class="nav-logo" id="nav-brand"><div class="ldot"></div><span id="nav-name"></span></a>
+    <ul class="nav-links">
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta magnetic">Hire Me</a>
+  </div>
 </nav>
+
 <section id="hero">
-<div class="wrap">
-<div class="hero-grid">
-<div class="hero-left">
-<div class="eyebrow a1"><div class="livdot"></div><span id="hero-status"></span></div>
-<h1 class="hname a2"><span class="fn" id="hero-firstname"></span> <span class="ln" id="hero-lastname"></span><canvas aria-hidden="true" id="name-canvas"></canvas></h1>
-<p class="hrole a3" id="hero-role"></p>
-<p class="hdesc a4" id="hero-desc"></p>
-<div class="hbtns a5">
-<a class="btn-p magnetic" href="#projects">View Projects ↗</a>
-<a class="btn-g magnetic" id="resume-dl">Download CV ↓</a>
-</div>
-<div class="hstats a6" id="hero-stats"></div>
-</div>
-<div class="hero-right a7">
-<div class="prof-wrap">
-<div class="ring-outer"></div>
-<div class="ring-mid"></div>
-<div class="pbox">
-<img alt="Profile Photo" id="profile-img" src="profile.jpg"/>
-</div>
-<div class="pbadges" id="hero-badges"></div>
-</div>
-<div class="loc" style="margin-top:2.8rem">
-<div class="gloc"></div><span id="hero-location"></span>
-</div>
-</div>
-</div>
-</div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <h1 class="hname a1"><span class="fn" id="hero-firstname"></span> <span class="ln" id="hero-lastname"></span><canvas id="name-canvas" aria-hidden="true"></canvas></h1>
+        <p class="hrole a2" id="hero-role"></p>
+        <p class="hdesc a3" id="hero-desc"></p>
+        <div class="hbtns a4">
+          <a href="#projects" class="btn-p magnetic">View Projects ↗</a>
+          <a id="resume-dl" class="btn-g magnetic">Download CV ↓</a>
+        </div>
+        <div class="hstats a5" id="hero-stats"></div>
+      </div>
+      <div class="hero-right a7">
+        <div class="prof-wrap">
+          <div class="ring-outer"></div>
+          <div class="ring-mid"></div>
+          <div class="pbox">
+            <img src="profile.jpg" id="profile-img" alt="Profile Photo"/>
+          </div>
+        </div>
+        <div class="loc" style="margin-top:2.8rem">
+          <div class="gloc"></div><span id="hero-location"></span>
+        </div>
+      </div>
+      <!-- Removed: the "eyebrow" status pill (was above the name) and the
+           floating profile badges (were below the profile photo). To bring
+           them back, restore the two blocks removed here and the two
+           render() lines noted near "hero-status"/"hero-badges" in the
+           script, and the "status"/"badges" fields in the ME object are
+           still there, just commented out. -->
+
+    </div>
+  </div>
 </section>
-<section class="sep" id="skills">
-<div class="wrap">
-<div class="shead reveal"><div class="slbl">01 — Skills</div><h2 class="stitle">ML, Python, Vision &amp; Web Stack</h2></div>
-<div class="sfeat" id="skills-featured"></div>
-<div class="chips-wrap reveal d2">
-<div class="chips-lbl">Full Skill Set</div>
-<div class="chips" id="skills-chips"></div>
-</div>
-</div>
+
+<section id="skills" class="sep">
+  <div class="wrap">
+    <div class="shead reveal"><div class="slbl">01 — Skills</div><h2 class="stitle">ML, Python, Vision & Web Stack</h2></div>
+    <div class="sfeat" id="skills-featured"></div>
+    <div class="chips-wrap reveal d2">
+      <div class="chips-lbl">Full Skill Set</div>
+      <div class="chips" id="skills-chips"></div>
+    </div>
+  </div>
 </section>
-<section class="sep" id="projects">
-<div class="wrap">
-<div class="shead reveal"><div class="slbl">02 — Projects</div><h2 class="stitle">Selected Work</h2></div>
-<div class="pgrid" id="projects-grid"></div>
-</div>
+
+<section id="projects" class="sep">
+  <div class="wrap">
+    <div class="shead reveal"><div class="slbl">02 — Projects</div><h2 class="stitle">Selected Work</h2></div>
+    <div class="pgrid" id="projects-grid"></div>
+  </div>
 </section>
-<section class="sep" id="experience">
-<div class="wrap">
-<div class="shead reveal"><div class="slbl">03 — Experience</div><h2 class="stitle">Where I've Worked</h2></div>
-<div class="etl" id="experience-list"></div>
-</div>
+
+<section id="experience" class="sep">
+  <div class="wrap">
+    <div class="shead reveal"><div class="slbl">03 — Experience</div><h2 class="stitle">Where I've Worked</h2></div>
+    <div class="etl" id="experience-list"></div>
+  </div>
 </section>
-<section class="sep" id="education">
-<div class="wrap">
-<div class="shead reveal"><div class="slbl">04 — Education</div><h2 class="stitle">Academic Background</h2></div>
-<div class="edugrid" id="education-grid"></div>
-<div class="reveal d1">
-<div class="certh">Certifications</div>
-<div class="certgrid" id="certs-grid"></div>
-</div>
-</div>
+
+<section id="education" class="sep">
+  <div class="wrap">
+    <div class="shead reveal"><div class="slbl">04 — Education</div><h2 class="stitle">Academic Background</h2></div>
+    <div class="edugrid" id="education-grid"></div>
+    <div class="reveal d1">
+      <div class="certh">Certifications</div>
+      <div class="certgrid" id="certs-grid"></div>
+    </div>
+  </div>
 </section>
-<section class="sep" id="resume">
-<div class="wrap">
-<div class="rcard reveal">
-<div>
-<div class="rcard-eyebrow">↓ Resume</div>
-<h2>Download the full CV or view it right here.</h2>
-<p>View or download my resume for a <code style="font-family:var(--mono);font-size:.78rem;color:var(--accent2)">detailed</code> overview of my experience, skills, education, and research work.</p>
-<ul class="rhl" id="resume-highlights"></ul>
-<div class="hbtns">
-<a class="btn-p" id="resume-dl2">Download PDF ↓</a>
-<a class="btn-g" id="resume-open" target="_blank">Open Resume ↗</a>
-</div>
-</div>
-<div class="rpreview" id="rprev">
-<span style="padding:1.5rem">Upload your PDF to<br/>see the preview here</span>
-</div>
-</div>
-</div>
+
+<section id="resume" class="sep">
+  <div class="wrap">
+    <div class="rcard reveal">
+      <div>
+        <div class="rcard-eyebrow">↓ Resume</div>
+        <h2>Download the full CV or view it right here.</h2>
+        <p>View or download my resume for a <code style="font-family:var(--mono);font-size:.78rem;color:var(--accent2)">detailed</code> overview of my experience, skills, education, and research work.</p>
+        <ul class="rhl" id="resume-highlights"></ul>
+        <div class="hbtns">
+          <a id="resume-dl2" class="btn-p">Download PDF ↓</a>
+          <a id="resume-open" target="_blank" class="btn-g">Open Resume ↗</a>
+        </div>
+      </div>
+      <div class="rpreview" id="rprev">
+        <span style="padding:1.5rem">Upload your PDF to<br/>see the preview here</span>
+      </div>
+    </div>
+  </div>
 </section>
-<section class="sep" id="contact">
-<div class="wrap">
-<div class="ctinner">
-<div class="reveal">
-<div class="slbl">05 — Contact</div>
-<div class="ctbig" id="contact-heading"></div>
-<p class="ctdesc" id="contact-desc"></p>
-<a class="cteml" id="contact-email-link"></a>
-</div>
-<div class="ctlinks reveal d2" id="contact-links"></div>
-</div>
-</div>
+
+<section id="contact" class="sep">
+  <div class="wrap">
+    <div class="ctinner">
+      <div class="reveal">
+        <div class="slbl">05 — Contact</div>
+        <div class="ctbig" id="contact-heading"></div>
+        <p class="ctdesc" id="contact-desc"></p>
+        <a id="contact-email-link" class="cteml"></a>
+      </div>
+      <div class="ctlinks reveal d2" id="contact-links"></div>
+    </div>
+  </div>
 </section>
+
 <footer>
-<div class="wrap">
-<div class="finner">
-<div class="fbrand" id="footer-brand"></div>
-<div class="fnote" id="footer-note"></div>
-</div>
-</div>
+  <div class="wrap">
+    <div class="finner">
+      <div class="fbrand" id="footer-brand"></div>
+      <div class="fnote" id="footer-note"></div>
+    </div>
+  </div>
 </footer>
-<script>/* ╔══════════════════════════════════════════════════════════════╗
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
    ║  ✏️  YOUR INFO — EDIT EVERYTHING IN THIS BLOCK              ║
    ║  All personal details live here. No need to touch           ║
    ║  anything else in the file.                                 ║
@@ -375,7 +385,7 @@ const ME = {
   lastName:   "Ullah",
   role: "Machine Learning Engineer · Computer Vision · Python ",
   location:   "Islamabad, Pakistan",
-  status:     "Available for ML / Python / Computer Vision Roles",
+  // status: "Available for ML / Python / Computer Vision Roles",  // ← removed from display on request; un-comment + restore the "eyebrow" markup/render line (see notes near hero-left) to bring it back
 
   /* ── CONTACT ───────────────────────────────────── */
   email:      "noorullahsb@gmail.com",
@@ -396,11 +406,12 @@ const ME = {
     { value: "MPhil", label: "Current Degree"        },
   ],
 
-  /* ── PROFILE BADGES ────────────────────────────── */
-  badges: [
-    { text: "ML Engineer", style: "bi" },
-    { text: "Researcher",  style: "bc" },
-  ],
+  /* ── PROFILE BADGES (removed from display on request — un-comment +
+     restore the .pbadges div near the profile photo to bring back) ── */
+  // badges: [
+  //   { text: "ML Engineer", style: "bi" },
+  //   { text: "Researcher",  style: "bc" },
+  // ],
 
   /* ── FEATURED SKILLS (4 cards) ─────────────────── */
   featuredSkills: [
@@ -542,9 +553,9 @@ function cssRGB(varName, fallback){
   const parts = v.split(',').map(n => parseInt(n, 10));
   return (parts.length === 3 && parts.every(n => !isNaN(n))) ? parts : fallback;
 }
-const ACCENT1 = cssRGB('--accent1-rgb', [122,150,92]);  // green
-const ACCENT2 = cssRGB('--accent2-rgb', [212,158,64]);  // amber
-const ACCENT3 = cssRGB('--accent3-rgb', [209,105,58]);  // burnt orange
+const ACCENT1 = cssRGB('--accent1-rgb', [62,207,142]);  // mint green #3ecf8e
+const ACCENT2 = cssRGB('--accent2-rgb', [228,105,94]);   // coral #e4695e
+const ACCENT3 = cssRGB('--accent3-rgb', [228,105,94]);   // aliased to accent2 (only 2 colors given)
 const ACCENT1_STR = ACCENT1.join(',');
 
 /* ── RENDER ── */
@@ -556,7 +567,6 @@ const ACCENT1_STR = ACCENT1.join(',');
   document.title = `${ME.firstName} ${ME.lastName} — ML Engineer`;
   set('nav-name', `${ME.firstName.toLowerCase()}.${ME.lastName.toLowerCase()}`);
 
-  set('hero-status',    ME.status);
   set('hero-firstname', ME.firstName);
   set('hero-lastname',  ME.lastName);
   set('hero-role',      ME.role);
@@ -567,9 +577,8 @@ const ACCENT1_STR = ACCENT1.join(',');
     `<div><span class="sv"${s.value.match(/^\d/) ? ` data-count="${parseInt(s.value)}"` : ''}>${s.value}</span><span class="sl">${s.label}</span></div>`
   ).join(''));
 
-  set('hero-badges', ME.badges.map(b =>
-    `<div class="badge ${b.style}">${b.text}</div>`
-  ).join(''));
+  // hero-status / hero-badges no longer rendered (removed on request) —
+  // ME.status / ME.badges above are kept commented for easy restoration.
 
   ['resume-dl','resume-dl2'].forEach(id => {
     const el = $(id);
@@ -712,7 +721,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
     /Android|iPhone|iPad|iPod|webOS|BlackBerry/i.test(navigator.userAgent);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) { document.getElementById('sbg').style.display='none'; return; }
-  const RES_SCALE = isMobile ? 0.55 : 1;   // render mobile at ~30% the pixel count — same soft ambient look, far less GPU work
+  const RES_SCALE = isMobile ? 0.4 : 1;    // render mobile at ~16% the pixel count — same soft ambient look, far less GPU work
   const FRAME_SKIP = isMobile ? 3 : 2;     // ~20fps mobile / ~30fps desktop — this drifts slowly, no visible loss
 
   const canvas = document.getElementById('sbg');
@@ -764,35 +773,37 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       float mw = exp(-md * md * 5.5) * 0.08;
 
       /* ============================================================
-         ACTIVE THEME — warm near-black base + green/amber/orange clouds
+         ACTIVE THEME — dark teal-black base + mint-green / coral clouds
+         (only 2 accent colors were given, so the 3rd "bridge" cloud below
+         is a blend of the two, not a separately invented hue)
          ORIGINAL (indigo/cyan/violet) values are commented after each
          line below — swap the active vec3 for the commented one (and
          vice versa) to revert just the ambient shader.
          ============================================================ */
-      vec3 bg = vec3(0.035, 0.030, 0.022);        // was vec3(0.027, 0.035, 0.059)
+      vec3 bg = vec3(0.047, 0.063, 0.067);        // was vec3(0.027, 0.035, 0.059)
 
-      /* moss-green cloud — clearly visible */
-      vec3 green = vec3(0.28, 0.40, 0.18);        // was indigo vec3(0.22, 0.24, 0.72)
+      /* mint-green cloud — clearly visible */
+      vec3 green = vec3(0.18, 0.61, 0.42);        // was indigo vec3(0.22, 0.24, 0.72)
       float gMask = smoothstep(0.32, 0.68, f) * 0.42;
 
-      /* amber accent — visible at peaks */
-      vec3 amber = vec3(0.62, 0.46, 0.12);        // was cyan vec3(0.04, 0.55, 0.72)
+      /* green→coral blend — bridging tone, visible at peaks */
+      vec3 amber = vec3(0.34, 0.37, 0.28);        // was cyan vec3(0.04, 0.55, 0.72)
       float aMask = smoothstep(0.48, 0.78, f2) * 0.28;
 
-      /* burnt-orange hint — visible blend layer */
-      vec3 orange = vec3(0.66, 0.30, 0.10);       // was violet vec3(0.42, 0.22, 0.72)
+      /* coral cloud — visible blend layer */
+      vec3 orange = vec3(0.63, 0.29, 0.26);       // was violet vec3(0.42, 0.22, 0.72)
       float oMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
 
       /* bright core where blobs peak */
       float peak = smoothstep(0.64, 0.88, f) * smoothstep(0.60, 0.85, f2);
-      vec3 coreCol = vec3(0.85, 0.68, 0.32) * peak * 0.18;   // was vec3(0.55, 0.48, 1.00)
+      vec3 coreCol = vec3(0.55, 0.92, 0.72) * peak * 0.18;   // was vec3(0.55, 0.48, 1.00)
 
       vec3 col = bg
                + green  * gMask
                + amber  * aMask
                + orange * oMask
                + coreCol
-               + vec3(0.62, 0.42, 0.18) * mw * 1.8;   // was vec3(0.30, 0.45, 0.85)
+               + vec3(0.75, 0.38, 0.32) * mw * 1.8;   // was vec3(0.30, 0.45, 0.85)
 
       /* soft vignette — darkens edges */
       vec2 vig = uv - 0.5;
@@ -903,6 +914,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   let visible = true;   // hero section in viewport
   let raf = null;       // non-null while a frame is scheduled; null = asleep
   const WAKE_MARGIN = isTouch ? 46 : 90;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2); // crisp on retina screens, capped so 3x phones don't triple the draw-buffer cost
   const probeCtx = document.createElement('canvas').getContext('2d');
 
   function lerp(a,b,t){ return a+(b-a)*t; }
@@ -932,8 +944,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     hname.classList.add('particled'); // locks the (invisible) fallback text to one line to match
 
     const h = Math.max(1, Math.ceil(fontPx * 1.3));
-    canvas.width = w; canvas.height = h;
+    // DPR-aware backing store: draw buffer is physically sharp, but every
+    // coordinate below stays in logical (CSS) px thanks to setTransform —
+    // this is what fixes the blurriness on high-DPI phone screens.
+    canvas.width = Math.round(w * DPR); canvas.height = Math.round(h * DPR);
     canvas.style.width = w+'px'; canvas.style.height = h+'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
     const off = document.createElement('canvas');
     off.width = w; off.height = h;
@@ -946,14 +962,16 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     let img;
     try { img = octx.getImageData(0,0,w,h).data; } catch(e){ return; }
 
-    const gap = isTouch ? 4 : (w > 750 ? 3 : 2);
+    // same sampling density on every device — this is what makes it
+    // consistent between mobile and desktop instead of mismatched
+    const gap = 2;
     const rawPts = [];
     for(let y=0; y<h; y+=gap){
       for(let x=0; x<w; x+=gap){
         if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y});
       }
     }
-    const MAX = isTouch ? 1600 : 4200;
+    const MAX = 2000;
     const step = rawPts.length > MAX ? Math.ceil(rawPts.length/MAX) : 1;
 
     particles = [];
@@ -967,7 +985,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
       const p = {
         ox:pt.x, oy:pt.y,
         x: pt.x+(Math.random()-.5)*60, y: pt.y+(Math.random()-.5)*60,
-        vx:0, vy:0, r: Math.random()*.9+.55,
+        vx:0, vy:0, r: Math.random()*.55+.85,
         color: `rgb(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0})`
       };
       particles.push(p); buckets[bi].push(p);
@@ -985,7 +1003,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     const rect = canvas.getBoundingClientRect();
     const lx = mx-rect.left, ly = my-rect.top;
     const mouseNear = lx > -WAKE_MARGIN && lx < rect.width+WAKE_MARGIN && ly > -WAKE_MARGIN && ly < rect.height+WAKE_MARGIN;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,rect.width,rect.height);
     const R=68, R2=R*R;
     let maxSpeed2 = 0;
     for(let b=0;b<BUCKETS;b++){
@@ -1010,8 +1028,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   }
 
   // wake on approach — cheap bounding-box check, only runs while asleep
+  let wakeThrottle = 0;
   function wakeCheck(){
     if(raf !== null || !visible) return;
+    if(++wakeThrottle % 3 !== 0) return; // during a fast scroll/drag, only sample every 3rd move
     const rect = canvas.getBoundingClientRect();
     if(mx > rect.left-WAKE_MARGIN && mx < rect.right+WAKE_MARGIN && my > rect.top-WAKE_MARGIN && my < rect.bottom+WAKE_MARGIN) scheduleFrame();
   }
