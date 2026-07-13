@@ -724,7 +724,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
     /Android|iPhone|iPad|iPod|webOS|BlackBerry/i.test(navigator.userAgent);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) { document.getElementById('sbg').style.display='none'; return; }
-  const RES_SCALE = isMobile ? 0.4 : 1;    // render mobile at ~16% the pixel count — same soft ambient look, far less GPU work
+  const RES_SCALE = isMobile ? 0.33 : 1;   // render mobile at ~11% the pixel count — same soft ambient look, far less GPU work
   const FRAME_SKIP = isMobile ? 3 : 2;     // ~20fps mobile / ~30fps desktop — this drifts slowly, no visible loss
 
   const canvas = document.getElementById('sbg');
@@ -870,7 +870,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d'); let W,H,pts=[];
 const cvReduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
-function initPts(){ pts=[]; const n=Math.min(140, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.4+.5}); }
+function initPts(){ pts=[]; const cvCap = (matchMedia('(hover:none)').matches) ? 70 : 140; const n=Math.min(cvCap, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.4+.5}); }
 let cvFrame=0;
 function drawCv(){
   if(document.hidden){ requestAnimationFrame(drawCv); return; }
@@ -917,7 +917,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   let visible = true;   // hero section in viewport
   let raf = null;       // non-null while a frame is scheduled; null = asleep
   const WAKE_MARGIN = isTouch ? 46 : 90;
-  const DPR = Math.min(window.devicePixelRatio || 1, 2); // crisp on retina screens, capped so 3x phones don't triple the draw-buffer cost
+  const DPR = Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2); // crisp screens, capped harder on mobile so 3x phones aren't tripling the draw-buffer cost
   const probeCtx = document.createElement('canvas').getContext('2d');
   const TEXT_RGB = [238,244,242]; // matches --text
 
@@ -938,17 +938,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     const cs = getComputedStyle(fnEl); // fn & ln share font family/weight/size — one line now
     let fontPx = parseFloat(cs.fontSize);
 
-    // scale-to-fit (grows AND shrinks): the name always fills the same
-    // proportion of its container on any screen size, instead of being
-    // capped by the CSS clamp()'s floor on narrow viewports.
+    // shrink-to-fit ONLY — never grow past the CSS clamp's own size. Growing
+    // sounds nice for "wider" text, but it makes the canvas taller than the
+    // box the (invisible) fallback text actually reserves, which is exactly
+    // what caused the name to overlap the role text on mobile. The CSS
+    // clamp() is already generous, so shrinking is only a safety net for
+    // narrow screens, not the primary sizing mechanism.
     probeCtx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
     let textW = probeCtx.measureText(fullName).width;
     const target = w * 0.97;
-    if(textW > 0){ fontPx *= (target / textW); }
+    if(textW > target && textW > 0){ fontPx *= (target / textW); }
     probeCtx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
     textW = probeCtx.measureText(fullName).width;
-
-    hname.classList.add('particled'); // locks the (invisible) fallback text to one line to match
 
     const h = Math.max(1, Math.ceil(fontPx * 1.3));
     // DPR-aware backing store: draw buffer is physically sharp, but every
@@ -979,7 +980,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         if(img[(y*w+x)*4+3] > 120) rawPts.push({x, y});
       }
     }
-    const MAX = 1200; // reduced per feedback — clearer, less busy letterforms
+    const MAX = isTouch ? 800 : 1200; // fewer draws per frame on mobile CPUs
     const step = rawPts.length > MAX ? Math.ceil(rawPts.length/MAX) : 1;
 
     particles = [];
@@ -995,6 +996,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         color: `rgb(${rgb[0]|0},${rgb[1]|0},${rgb[2]|0})`
       };
       particles.push(p); buckets[bi].push(p);
+    }
+
+    if(particles.length){
+      hname.classList.add('particled'); // locks the (invisible) fallback text to one line to match
+      hname.style.height = h + 'px';    // lock the box to the canvas size — belt-and-braces against any future mismatch
     }
   }
 
@@ -1023,6 +1029,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         p.vx+=(p.ox-p.x)*.05; p.vy+=(p.oy-p.y)*.05;
         p.vx*=.82; p.vy*=.82;
         p.x+=p.vx; p.y+=p.vy;
+        // keep scatter contained near the canvas — prevents many particles
+        // from flying far off-screen and later bunching into a visible
+        // "wall" as they all cross back through the same edge at once
+        if(p.x < -40) p.x = -40; else if(p.x > rect.width+40) p.x = rect.width+40;
+        if(p.y < -40) p.y = -40; else if(p.y > rect.height+40) p.y = rect.height+40;
         const s2 = p.vx*p.vx+p.vy*p.vy;
         if(s2>maxSpeed2) maxSpeed2=s2;
         ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
@@ -1046,7 +1057,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   document.addEventListener('touchmove', wakeCheck, {passive:true});
 
   canvas.addEventListener('click', ()=>{
-    particles.forEach(p=>{ p.vx+=(Math.random()-.5)*16; p.vy+=(Math.random()-.5)*16-6; });
+    particles.forEach(p=>{ p.vx+=(Math.random()-.5)*9; p.vy+=(Math.random()-.5)*9-3; });
     scheduleFrame();
   });
 
