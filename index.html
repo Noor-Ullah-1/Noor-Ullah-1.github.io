@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#0c1011"/>
+<meta name="theme-color" content="#07090f"/>
 <title>Noor Ullah</title>
 <link rel="icon" type="image/png" href="icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -12,38 +12,31 @@
 <style>
 :root {
   /* ==========================================================================
-     ACTIVE THEME — dark teal-black / mint green / red
+     ACTIVE THEME — original indigo / cyan / violet
      Colors are defined as R,G,B triplets (--accentN-rgb) so both the CSS below
      AND the JS-drawn canvases (particle name, background dust, ambient shader)
      read from these SAME values — change a palette here and everything follows.
-     Only 2 accent colors were given, so --accent3 is aliased to --accent2
-     (the 3-stop gradients below simply settle into solid red for their
-     second half instead of shifting to a 3rd hue).
-
-     TO REVERT TO THE ORIGINAL INDIGO/CYAN/VIOLET LOOK:
-     replace the 9 declarations below (from --bg through --green) with the
-     9 declarations in the commented "ORIGINAL THEME" block further down.
-     Nothing else in the file needs to change.
      ========================================================================== */
-  --bg:#0c1011;--bg2:#121a1b;--surface:rgba(238,244,242,0.045);--surface2:rgba(238,244,242,0.075);
-  --border:rgba(238,244,242,0.09);--text:#eef4f2;--muted:#8a9997;
-  --accent1-rgb:62,207,142;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#2b9163;
-  --accent2-rgb:229,72,77;--accent2:rgb(var(--accent2-rgb));
-  --accent3-rgb:229,72,77;--accent3:rgb(var(--accent3-rgb));
-  --green:var(--accent1);
-  --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;--ease:cubic-bezier(0.22,1,0.36,1);
-
-  /* ==========================================================================
-     ORIGINAL THEME (indigo / cyan / violet) — commented out, kept for revert.
-     To restore: copy these 9 lines over the 9 "ACTIVE THEME" lines above.
-  
   --bg:#07090f;--bg2:#0c0f1a;--surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);
   --border:rgba(255,255,255,0.08);--text:#f0f2ff;--muted:#6b7280;
   --accent1-rgb:99,102,241;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#4f51d4;
   --accent2-rgb:6,182,212;--accent2:rgb(var(--accent2-rgb));
   --accent3-rgb:139,92,246;--accent3:rgb(var(--accent3-rgb));
   --green:#22c55e;
-  
+  --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;--ease:cubic-bezier(0.22,1,0.36,1);
+
+  /* ==========================================================================
+     ALTERNATE THEME (dark teal-black / mint green / red) — commented out.
+     This was tried earlier; kept here in case you want it back.
+     To restore: copy these 9 lines over the 9 "ACTIVE THEME" lines above.
+
+  --bg:#0c1011;--bg2:#121a1b;--surface:rgba(238,244,242,0.045);--surface2:rgba(238,244,242,0.075);
+  --border:rgba(238,244,242,0.09);--text:#eef4f2;--muted:#8a9997;
+  --accent1-rgb:62,207,142;--accent1:rgb(var(--accent1-rgb));--accent1-hover:#2b9163;
+  --accent2-rgb:229,72,77;--accent2:rgb(var(--accent2-rgb));
+  --accent3-rgb:229,72,77;--accent3:rgb(var(--accent3-rgb));
+  --green:var(--accent1);
+
      The .grid background pattern and the WebGL shader's cloud colors are
      hand-tuned separately (not driven by the variables above) — see the
      commented original values next to the .grid rule and inside the FRAG
@@ -62,15 +55,15 @@ a{color:inherit;text-decoration:none}
 .cdot.h{background:var(--accent2);transform:translate(-50%,-50%) scale(1.6)}
 .cring.h{width:56px;height:56px;border-color:var(--accent2)}
 .mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 12% 18%,rgba(var(--accent1-rgb),.10) 0%,transparent 60%),radial-gradient(ellipse 55% 38% at 88% 72%,rgba(var(--accent2-rgb),.08) 0%,transparent 55%),radial-gradient(ellipse 45% 45% at 52% 98%,rgba(var(--accent3-rgb),.06) 0%,transparent 60%)}
-.grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(150,165,163,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(150,165,163,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)} /* original grid line color: rgba(148,163,184,.045) */
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%);mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%)}
 .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
 .scanline{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(to bottom,transparent 50%,rgba(var(--accent1-rgb),.012) 50%);background-size:100% 4px}
 #sbg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 #cv{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.13}
 .wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem;position:relative;z-index:2}
 nav{position:fixed;top:0;width:100%;z-index:500;padding:1.2rem 0;transition:background .45s ease,box-shadow .45s ease}
-nav.scrolled{background:rgba(12,16,17,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
-@media(max-width:768px){nav.scrolled{backdrop-filter:blur(8px) saturate(1.2);background:rgba(12,16,17,.94)}}
+nav.scrolled{background:rgba(7,9,15,.88);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 var(--border)}
+@media(max-width:768px){nav.scrolled{backdrop-filter:blur(8px) saturate(1.2);background:rgba(7,9,15,.94)}.grain,.scanline{display:none}}
 .nav-i{display:flex;align-items:center;justify-content:space-between;max-width:1160px;margin:0 auto;padding:0 2.5rem}
 .nav-logo{display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em}
 .ldot{width:8px;height:8px;border-radius:50%;background:var(--accent1);box-shadow:0 0 10px var(--accent1);animation:ldotpulse 2.8s ease infinite}
@@ -149,7 +142,7 @@ section{padding:7rem 0;position:relative;z-index:2}
 .sfeat{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2.5rem}
 .skcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;overflow:hidden;transition:border-color .32s,background .32s,transform .4s var(--ease),box-shadow .4s}
 .skcard::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 65% 15%,rgba(var(--accent1-rgb),.08),transparent 55%);opacity:0;transition:opacity .38s}
-.skcard:hover{border-color:rgba(var(--accent1-rgb),.42);background:rgba(238,244,242,.055);transform:translateY(-7px);box-shadow:0 18px 52px rgba(0,0,0,.28),0 0 0 1px rgba(var(--accent1-rgb),.13)}
+.skcard:hover{border-color:rgba(var(--accent1-rgb),.42);background:rgba(255,255,255,.055);transform:translateY(-7px);box-shadow:0 18px 52px rgba(0,0,0,.28),0 0 0 1px rgba(var(--accent1-rgb),.13)}
 .skcard:hover::after{opacity:1}
 .ski{font-size:1.7rem;display:block;margin-bottom:1rem}
 .skn{font-size:1rem;font-weight:700;margin-bottom:.35rem}
@@ -229,12 +222,20 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
 .finner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
 .fbrand{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
 .fbrand span{color:var(--accent1)}
-.fnote{font-family:var(--mono);font-size:.66rem;color:rgba(238,244,242,.14)}
+.fnote{font-family:var(--mono);font-size:.66rem;color:rgba(255,255,255,.14)}
 @media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:3rem}.hero-right{order:-1}.prof-wrap{width:240px;height:240px}.sfeat{grid-template-columns:1fr 1fr}.pgrid{grid-template-columns:1fr 1fr}.eitem{grid-template-columns:1fr;gap:.5rem}.etl::before,.edot{display:none}.eleft{padding-left:0}.edugrid{grid-template-columns:1fr}.certgrid{grid-template-columns:1fr}.ctinner{grid-template-columns:1fr;gap:3rem}#resume .rcard{grid-template-columns:1fr}
   .hero-left{text-align:center}
   .hbtns{justify-content:center}.hstats{justify-content:center}
 }
-@media(max-width:620px){.nav-links{display:none}.sfeat,.pgrid{grid-template-columns:1fr}.wrap{padding:0 1.25rem}.hstats{gap:1.5rem}}
+@media(max-width:620px){.nav-links{display:none}.sfeat,.pgrid{grid-template-columns:1fr}.wrap{padding:0 1.25rem}.hstats{gap:1.25rem;margin-top:1.6rem;padding-top:1.15rem}
+  #hero{min-height:auto;padding:88px 0 2.5rem}
+  .hero-grid{gap:1.1rem}
+  .prof-wrap{width:108px;height:108px}
+  .loc{margin-top:.7rem;font-size:.62rem}
+  .hname{margin-bottom:.4rem}
+  .hrole{margin-bottom:.85rem;font-size:.72rem}
+  .hdesc{margin-bottom:1.3rem;font-size:.92rem;line-height:1.62}
+}
 @media(hover:none){body{cursor:auto}.cdot,.cring{display:none}}
 </style>
 </head>
@@ -256,7 +257,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
       <li><a href="#education">Education</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
-    <a href="#contact" class="nav-cta magnetic">Contact</a>
+    <a href="#contact" class="nav-cta magnetic">Hire Me</a>
   </div>
 </nav>
 
@@ -281,7 +282,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem 0;position:relative;z-i
             <img src="profile.jpg" id="profile-img" alt="Profile Photo"/>
           </div>
         </div>
-        <div class="loc" style="margin-top:2.8rem">
+        <div class="loc">
           <div class="gloc"></div><span id="hero-location"></span>
         </div>
       </div>
@@ -391,9 +392,9 @@ const ME = {
   // status: "Available for ML / Python / Computer Vision Roles",  // ← removed from display on request; un-comment + restore the "eyebrow" markup/render line (see notes near hero-left) to bring it back
 
   /* ── CONTACT ───────────────────────────────────── */
-  email:      "noorullahsb@gmail.com",
+  email:      "noorullahsb@outlook.com",
   linkedin:   "https://linkedin.com/in/noor-ullah007/",
-  github:     "https://github.com/Noor-Ullah-1",
+  // github: "https://github.com/Noor-Ullah-1",  // ← removed from contact section on request; un-comment + restore the GitHub line in the contact-links template (see render()) to bring it back
 
   /* ── RESUME ────────────────────────────────────── */
   resumeFile: "noor-ullah-resume.pdf",
@@ -556,9 +557,9 @@ function cssRGB(varName, fallback){
   const parts = v.split(',').map(n => parseInt(n, 10));
   return (parts.length === 3 && parts.every(n => !isNaN(n))) ? parts : fallback;
 }
-const ACCENT1 = cssRGB('--accent1-rgb', [62,207,142]);  // mint green #3ecf8e
-const ACCENT2 = cssRGB('--accent2-rgb', [229,72,77]);   // red #e5484d
-const ACCENT3 = cssRGB('--accent3-rgb', [229,72,77]);   // aliased to accent2 (only 2 colors given)
+const ACCENT1 = cssRGB('--accent1-rgb', [99,102,241]);  // indigo #6366f1
+const ACCENT2 = cssRGB('--accent2-rgb', [6,182,212]);    // cyan #06b6d4
+const ACCENT3 = cssRGB('--accent3-rgb', [139,92,246]);   // violet #8b5cf6
 const ACCENT1_STR = ACCENT1.join(',');
 
 /* ── RENDER ── */
@@ -652,9 +653,7 @@ const ACCENT1_STR = ACCENT1.join(',');
   const el = $('contact-email-link');
   if(el){ el.href = `mailto:${ME.email}`; el.innerHTML = `✉&nbsp; ${ME.email}`; }
   set('contact-links', `
-    <a href="mailto:${ME.email}" class="ctlink"><div class="ctll"><span>✉</span>Email</div><span class="ctarr">→</span></a>
     <a href="${ME.linkedin}" target="_blank" class="ctlink"><div class="ctll"><span>💼</span>LinkedIn</div><span class="ctarr">↗</span></a>
-    <a href="${ME.github}" target="_blank" class="ctlink"><div class="ctll"><span>🐙</span>GitHub</div><span class="ctarr">↗</span></a>
     <div class="ctlink" style="cursor:default"><div class="ctll"><span>📍</span>${ME.location}</div><span class="ctarr" style="font-size:.66rem">GMT+5</span></div>
     <div class="ctlink" style="cursor:default"><div class="ctll"><span>🌐</span>${ME.languages}</div><span class="ctarr" style="font-size:.66rem">Languages</span></div>
   `);
@@ -681,6 +680,16 @@ document.addEventListener('touchmove', e => { if(e.touches[0]){ mx=e.touches[0].
 document.addEventListener('touchstart', e => { if(e.touches[0]){ mx=e.touches[0].clientX; my=e.touches[0].clientY; } }, {passive:true});
 document.addEventListener('touchend', () => { mx=-9999; my=-9999; }, {passive:true}); // finger lifted — let interactive effects settle back to rest
 (function tick(){ dot.style.left=mx+'px'; dot.style.top=my+'px'; rx+=(mx-rx)*.13; ry+=(my-ry)*.13; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(tick); })();
+
+/* ── SCROLL STATE — lets the always-on background canvases pause while
+   actively scrolling, so the compositor gets full headroom exactly when
+   scroll smoothness matters most. Resumes ~150ms after scrolling stops. ── */
+let isScrolling = false, scrollStopTimer;
+window.addEventListener('scroll', ()=>{
+  isScrolling = true;
+  clearTimeout(scrollStopTimer);
+  scrollStopTimer = setTimeout(()=>{ isScrolling = false; }, 150);
+}, { passive:true });
 
 /* ── SCROLL: progress bar + nav highlighting, combined & rAF-throttled ── */
 const prog = document.getElementById('progress');
@@ -776,37 +785,36 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
       float mw = exp(-md * md * 5.5) * 0.08;
 
       /* ============================================================
-         ACTIVE THEME — dark teal-black base + mint-green / red clouds
-         (only 2 accent colors were given, so the 3rd "bridge" cloud below
-         is a blend of the two, not a separately invented hue)
-         ORIGINAL (indigo/cyan/violet) values are commented after each
-         line below — swap the active vec3 for the commented one (and
-         vice versa) to revert just the ambient shader.
+         ACTIVE THEME — original indigo/cyan/violet clouds.
+         An alternate (teal-black base + mint-green/red) version was tried
+         earlier and is commented after each line below, in case you want
+         it back — swap the active vec3 for the commented one (and
+         vice versa) to switch just the ambient shader.
          ============================================================ */
-      vec3 bg = vec3(0.047, 0.063, 0.067);        // was vec3(0.027, 0.035, 0.059)
+      vec3 bg = vec3(0.027, 0.035, 0.059);        // alt: vec3(0.047, 0.063, 0.067)
 
-      /* mint-green cloud — clearly visible */
-      vec3 green = vec3(0.18, 0.61, 0.42);        // was indigo vec3(0.22, 0.24, 0.72)
-      float gMask = smoothstep(0.32, 0.68, f) * 0.42;
+      /* indigo cloud — clearly visible */
+      vec3 indigo = vec3(0.22, 0.24, 0.72);       // alt green: vec3(0.18, 0.61, 0.42)
+      float iMask = smoothstep(0.32, 0.68, f) * 0.42;
 
-      /* green→red blend — bridging tone, visible at peaks */
-      vec3 amber = vec3(0.34, 0.33, 0.26);        // was cyan vec3(0.04, 0.55, 0.72)
-      float aMask = smoothstep(0.48, 0.78, f2) * 0.28;
+      /* cyan accent — visible at peaks */
+      vec3 cyan = vec3(0.04, 0.55, 0.72);         // alt amber: vec3(0.34, 0.33, 0.26)
+      float cMask = smoothstep(0.48, 0.78, f2) * 0.28;
 
-      /* red cloud — visible blend layer */
-      vec3 orange = vec3(0.63, 0.20, 0.21);       // was violet vec3(0.42, 0.22, 0.72)
-      float oMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
+      /* violet hint — visible blend layer */
+      vec3 violet = vec3(0.42, 0.22, 0.72);       // alt red: vec3(0.63, 0.20, 0.21)
+      float vMask = smoothstep(0.55, 0.82, f * f2) * 0.20;
 
       /* bright core where blobs peak */
       float peak = smoothstep(0.64, 0.88, f) * smoothstep(0.60, 0.85, f2);
-      vec3 coreCol = vec3(0.55, 0.92, 0.72) * peak * 0.18;   // was vec3(0.55, 0.48, 1.00)
+      vec3 coreCol = vec3(0.55, 0.48, 1.00) * peak * 0.18;   // alt: vec3(0.55, 0.92, 0.72)
 
       vec3 col = bg
-               + green  * gMask
-               + amber  * aMask
-               + orange * oMask
+               + indigo * iMask
+               + cyan   * cMask
+               + violet * vMask
                + coreCol
-               + vec3(0.67, 0.21, 0.23) * mw * 1.8;   // was vec3(0.30, 0.45, 0.85)
+               + vec3(0.30, 0.45, 0.85) * mw * 1.8;   // alt: vec3(0.67, 0.21, 0.23)
 
       /* soft vignette — darkens edges */
       vec2 vig = uv - 0.5;
@@ -854,7 +862,7 @@ fetch(ME.resumeFile,{method:'HEAD'}).then(r=>{ if(r.ok) document.getElementById(
   const t0=performance.now();
   let shaderFrame=0;
   (function loop(){
-    if(document.hidden){ requestAnimationFrame(loop); return; }
+    if(document.hidden || isScrolling){ requestAnimationFrame(loop); return; }
     shaderFrame++;
     if(shaderFrame % FRAME_SKIP !== 0){ requestAnimationFrame(loop); return; }
     smx+=(tmx-smx)*.11; smy+=(tmy-smy)*.11;
@@ -873,7 +881,7 @@ function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
 function initPts(){ pts=[]; const cvCap = (matchMedia('(hover:none)').matches) ? 70 : 140; const n=Math.min(cvCap, Math.floor(W*H/17000)); for(let i=0;i<n;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.4+.5}); }
 let cvFrame=0;
 function drawCv(){
-  if(document.hidden){ requestAnimationFrame(drawCv); return; }
+  if(document.hidden || isScrolling){ requestAnimationFrame(drawCv); return; }
   cvFrame++;
   if(cvFrame % 2 === 0){ requestAnimationFrame(drawCv); return; } // ~30fps — halves the O(n²) pairwise-distance cost
   ctx.clearRect(0,0,W,H);
@@ -1029,11 +1037,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
         p.vx+=(p.ox-p.x)*.05; p.vy+=(p.oy-p.y)*.05;
         p.vx*=.82; p.vy*=.82;
         p.x+=p.vx; p.y+=p.vy;
-        // keep scatter contained near the canvas — prevents many particles
-        // from flying far off-screen and later bunching into a visible
-        // "wall" as they all cross back through the same edge at once
-        if(p.x < -40) p.x = -40; else if(p.x > rect.width+40) p.x = rect.width+40;
-        if(p.y < -40) p.y = -40; else if(p.y > rect.height+40) p.y = rect.height+40;
+        // clamp displacement relative to EACH particle's own origin — not
+        // to the canvas edges. A shared absolute boundary let particles
+        // from many different letters all pile up at the same coordinate
+        // under sustained repel force (the "stuck to the right border"
+        // line). Bounding relative to (ox,oy) keeps every particle near
+        // its own letter no matter how long the cursor pushes on it.
+        const ddx=p.x-p.ox, ddy=p.y-p.oy, dd2=ddx*ddx+ddy*ddy;
+        if(dd2 > 2500){ const dd=Math.sqrt(dd2); p.x=p.ox+ddx/dd*50; p.y=p.oy+ddy/dd*50; p.vx*=.4; p.vy*=.4; }
         const s2 = p.vx*p.vx+p.vy*p.vy;
         if(s2>maxSpeed2) maxSpeed2=s2;
         ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
