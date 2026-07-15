@@ -1035,18 +1035,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
       for(let i=0;i<arr.length;i++){
         const p=arr[i];
         const dx=p.x-lx, dy=p.y-ly, d2=dx*dx+dy*dy;
-        if(d2<R2){ const d=Math.sqrt(d2)||.01, f=(R-d)/R; p.vx+=(dx/d)*f*3; p.vy+=(dy/d)*f*3; }
-        p.vx+=(p.ox-p.x)*.05; p.vy+=(p.oy-p.y)*.05;
+        if(d2<R2){ const d=Math.sqrt(d2)||.01, f=(R-d)/R; p.vx+=(dx/d)*f*2.2; p.vy+=(dy/d)*f*2.2; }
+        // progressive spring — gets much stiffer the further a particle
+        // strays from its own origin. A constant-strength spring could be
+        // matched (and held) by sustained repel force right at the old
+        // hard clamp, which is exactly why particles used to freeze in a
+        // line at the boundary. An escalating spring always wins eventually,
+        // so nothing can get pinned in place no matter how long the cursor
+        // pushes on it.
+        const ddx0=p.ox-p.x, ddy0=p.oy-p.y, disp2=ddx0*ddx0+ddy0*ddy0;
+        const springK = 0.05 + Math.min(disp2/2500, 1)*0.3;
+        p.vx+=ddx0*springK; p.vy+=ddy0*springK;
         p.vx*=.82; p.vy*=.82;
         p.x+=p.vx; p.y+=p.vy;
-        // clamp displacement relative to EACH particle's own origin — not
-        // to the canvas edges. A shared absolute boundary let particles
-        // from many different letters all pile up at the same coordinate
-        // under sustained repel force (the "stuck to the right border"
-        // line). Bounding relative to (ox,oy) keeps every particle near
-        // its own letter no matter how long the cursor pushes on it.
+        // loose safety net only — the spring above should make this rare
         const ddx=p.x-p.ox, ddy=p.y-p.oy, dd2=ddx*ddx+ddy*ddy;
-        if(dd2 > 2500){ const dd=Math.sqrt(dd2); p.x=p.ox+ddx/dd*50; p.y=p.oy+ddy/dd*50; p.vx*=.4; p.vy*=.4; }
+        if(dd2 > 8100){ const dd=Math.sqrt(dd2); p.x=p.ox+ddx/dd*90; p.y=p.oy+ddy/dd*90; p.vx*=.3; p.vy*=.3; }
         const s2 = p.vx*p.vx+p.vy*p.vy;
         if(s2>maxSpeed2) maxSpeed2=s2;
         ctx.fillRect(p.x-p.r, p.y-p.r, p.r*2, p.r*2);
